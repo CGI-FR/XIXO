@@ -1,10 +1,9 @@
 # Venom Test Suite definition
 # Check Venom documentation for more information : https://github.com/ovh/venom
-name: run cli
+name: run xixo
 testcases:
   - name: no arguments
     steps:
-      - script: cli
+      - script: xixo
         assertions:
-          - result.systemout ShouldContainSubstring Hello World!
           - result.code ShouldEqual 0

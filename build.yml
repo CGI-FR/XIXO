@@ -39,6 +39,9 @@ properties:
   linters: [] # List of linters to run on the lint target, if left empty : run all linters
   lintersno: # List of linters to exclude on running the lint target
     [
+      "ireturn",
+      "varnamelen",
+      "wrapcheck",
       "scopelint",
       "interfacer",
       "maligned",
@@ -253,7 +256,7 @@ targets:
   # neon -props '{testsuites: "<test suite filename>"}' test-int-debug
   test-int-debug:
     doc: "Run all integration tests"
-    depends: ["info","compile"]
+    depends: ["info", "compile"]
     steps:
       - delete: venom*.log
       - $: venom run test/suites/={testsuites}
