@@ -39,6 +39,13 @@ properties:
   linters: [] # List of linters to run on the lint target, if left empty : run all linters
   lintersno: # List of linters to exclude on running the lint target
     [
+      "gocognit",
+      "funlen",
+      "cyclop",
+      "nestif",
+      "exhaustruct",
+      "goerr113",
+      "gomnd",
       "ireturn",
       "varnamelen",
       "wrapcheck",

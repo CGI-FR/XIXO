@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/youen/xixo/pkg/xixo"
 )
 
@@ -27,7 +28,8 @@ func TestCopyXMLWithoutCallback(t *testing.T) {
 	parser := xixo.NewXMLParser(reader, &resultXMLBuffer)
 
 	// Créez un canal pour collecter les résultats du parser
-	parser.Stream()
+	err := parser.Stream()
+	assert.Nil(t, err)
 
 	// Vérifiez si le résultat XML est identique à l'entrée
 	resultXML := resultXMLBuffer.String()
@@ -37,21 +39,14 @@ func TestCopyXMLWithoutCallback(t *testing.T) {
 	}
 }
 
-// Callback pour modifier le contenu des nœuds <element1>
-func modifyElement1Content(elem *xixo.XMLElement) *xixo.XMLElement {
-	elem.InnerText = "ContenuModifie"
-
-	return elem
-}
-
 // TestModifyElement1ContentWithCallback vérifie que la fonction de rappel modifie correctement les nœuds <element1>.
 func TestModifyElement1ContentWithCallback(t *testing.T) {
 	t.Parallel()
 	// Fichier XML en entrée
 	inputXML := `
 	<root>
-		<element1>Contenu1</element1>
-		<element2>Contenu2</element2>
+		<element1>Hello <name>world</name> !</element1>
+		<element2>Contenu2 <name> </name> ! </element2>
 	</root>`
 
 	// Lisez les résultats du canal et construisez le XML résultant
@@ -65,13 +60,60 @@ func TestModifyElement1ContentWithCallback(t *testing.T) {
 	parser.RegisterCallback("element1", modifyElement1Content)
 
 	// Créez un canal pour collecter les résultats du parser
-	parser.Stream()
+	err := parser.Stream()
+	assert.Nil(t, err)
 
 	// Résultat XML attendu avec le contenu modifié
 	expectedResultXML := `
 	<root>
 		<element1>ContenuModifie</element1>
-		<element2>Contenu2</element2>
+		<element2>Contenu2 <name> </name> ! </element2>
+	</root>`
+
+	// Vérifiez si le résultat XML correspond à l'attendu
+	resultXML := resultXMLBuffer.String()
+
+	if resultXML != expectedResultXML {
+		t.Errorf("Le résultat XML ne correspond pas à l'attendu.\nAttendu:\n%s\nObtenu:\n%s", expectedResultXML, resultXML)
+	}
+}
+
+// Callback pour modifier le contenu des nœuds <element1>.
+func modifyElement1Content(elem *xixo.XMLElement) *xixo.XMLElement {
+	elem.InnerText = "ContenuModifie"
+
+	return elem
+}
+
+// TestModifyElement1ContentWithCallback vérifie que la fonction de rappel modifie correctement les nœuds <element1>.
+func TestModifyElementWrappedWithTextWithCallback(t *testing.T) {
+	t.Parallel()
+	// Fichier XML en entrée
+	inputXML := `
+	<root>
+		<element1>Hello <name>world</name> !</element1>
+		<element2>Contenu2 <name> </name> ! </element2>
+	</root>`
+
+	// Lisez les résultats du canal et construisez le XML résultant
+	var resultXMLBuffer bytes.Buffer
+
+	// Créez un bufio.Reader à partir du XML en entrée
+	reader := bytes.NewBufferString(inputXML)
+
+	// Créez une nouvelle instance du parser XML avec la fonction de rappel
+	parser := xixo.NewXMLParser(reader, &resultXMLBuffer)
+	parser.RegisterCallback("name", modifyElement1Content)
+
+	// Créez un canal pour collecter les résultats du parser
+	err := parser.Stream()
+	assert.Nil(t, err)
+
+	// Résultat XML attendu avec le contenu modifié
+	expectedResultXML := `
+	<root>
+		<element1>Hello <name>ContenuModifie</name> !</element1>
+		<element2>Contenu2 <name>ContenuModifie</name> ! </element2>
 	</root>`
 
 	// Vérifiez si le résultat XML correspond à l'attendu

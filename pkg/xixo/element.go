@@ -35,6 +35,7 @@ func (n *XMLElement) FirstChild() *XMLElement {
 	if len(n.childs) > 0 {
 		return n.childs[0]
 	}
+
 	return nil
 }
 
@@ -42,6 +43,7 @@ func (n *XMLElement) LastChild() *XMLElement {
 	if l := len(n.childs); l > 0 {
 		return n.childs[l-1]
 	}
+
 	return nil
 }
 
@@ -52,10 +54,12 @@ func (n *XMLElement) PrevSibling() *XMLElement {
 				if i >= 0 {
 					return n.parent.childs[i-1]
 				}
+
 				return nil
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -66,10 +70,12 @@ func (n *XMLElement) NextSibling() *XMLElement {
 				if i+1 < len(n.parent.childs) {
 					return n.parent.childs[i+1]
 				}
+
 				return nil
 			}
 		}
 	}
+
 	return nil
 }
 
