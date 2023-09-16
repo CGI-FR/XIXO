@@ -2,41 +2,56 @@ package xixo
 
 import "encoding/json"
 
-type Callback func(*XMLElement) *XMLElement
+type Callback func(*XMLElement) (*XMLElement, error)
 
-type CallbackMap func(map[string]string) map[string]string
+type CallbackMap func(map[string]string) (map[string]string, error)
 
-type CallbackJSON func(string) string
+type CallbackJSON func(string) (string, error)
 
 func XMLElementToMapCallback(callback CallbackMap) Callback {
-	result := func(xmlElement *XMLElement) *XMLElement {
+	result := func(xmlElement *XMLElement) (*XMLElement, error) {
 		dict := map[string]string{}
 
 		for name, child := range xmlElement.Childs {
 			dict[name] = child[0].InnerText
 		}
 
-		for name, value := range callback(dict) {
+		dict, err := callback(dict)
+		if err != nil {
+			return nil, err
+		}
+
+		for name, value := range dict {
 			xmlElement.Childs[name][0].InnerText = value
 		}
 
-		return xmlElement
+		return xmlElement, nil
 	}
 
 	return result
 }
 
 func XMLElementToJSONCallback(callback CallbackJSON) Callback {
-	resultCallback := func(dict map[string]string) map[string]string {
-		source, _ := json.Marshal(dict)
+	resultCallback := func(dict map[string]string) (map[string]string, error) {
+		source, err := json.Marshal(dict)
+		if err != nil {
+			return nil, err
+		}
 
-		dest := callback(string(source))
+		dest, err := callback(string(source))
+		if err != nil {
+			return nil, err
+		}
 
 		result := map[string]string{}
 
-		json.Unmarshal([]byte(dest), &result)
+		err = json.Unmarshal([]byte(dest), &result)
+		if err != nil {
+			return nil, err
+		}
 
-		return result
+		return result, nil
 	}
+
 	return XMLElementToMapCallback(resultCallback)
 }

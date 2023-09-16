@@ -79,10 +79,10 @@ func TestModifyElement1ContentWithCallback(t *testing.T) {
 }
 
 // Callback pour modifier le contenu des nœuds <element1>.
-func modifyElement1Content(elem *xixo.XMLElement) *xixo.XMLElement {
+func modifyElement1Content(elem *xixo.XMLElement) (*xixo.XMLElement, error) {
 	elem.InnerText = "ContenuModifie"
 
-	return elem
+	return elem, nil
 }
 
 // TestModifyElement1ContentWithCallback vérifie que la fonction de rappel modifie correctement les nœuds <element1>.

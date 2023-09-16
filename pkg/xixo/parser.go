@@ -154,9 +154,12 @@ func (x *XMLParser) parse() error {
 				x.resultChannel <- element
 
 				if callback, ok := x.loopElements[element.Name]; ok {
-					mutatedElement := callback(element)
+					mutatedElement, err := callback(element)
+					if err != nil {
+						return err
+					}
 
-					_, err := x.writer.WriteString(mutatedElement.String()[1:])
+					_, err = x.writer.WriteString(mutatedElement.String()[1:])
 					if err != nil {
 						return err
 					}
