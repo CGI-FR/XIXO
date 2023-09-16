@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-type Callback func(*XMLElement) *XMLElement
-
 type XMLParser struct {
 	reader            *bufio.Reader
 	writer            *bufio.Writer
@@ -843,6 +841,9 @@ func (x *XMLParser) commitDefferWrite() error {
 
 func (x *XMLParser) readByte() (byte, error) {
 	by, err := x.reader.ReadByte()
+	if err != nil {
+		return 0, err
+	}
 
 	if !x.deffer {
 		if x.nextWrite != nil {
@@ -858,10 +859,6 @@ func (x *XMLParser) readByte() (byte, error) {
 	}
 
 	x.TotalReadSize++
-
-	if err != nil {
-		return 0, err
-	}
 
 	return by, nil
 }

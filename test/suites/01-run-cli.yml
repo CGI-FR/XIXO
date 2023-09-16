@@ -7,3 +7,10 @@ testcases:
       - script: xixo
         assertions:
           - result.code ShouldEqual 0
+
+  - name: simple inputs
+    steps:
+      - script: echo '<root><element1>innerText</element1></root>' | xixo
+        assertions:
+          - result.code ShouldEqual 0
+          - result.systemout ShouldEqual <root><element1>innerText</element1></root>

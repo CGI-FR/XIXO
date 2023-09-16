@@ -23,11 +23,11 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/youen/xixo/pkg/xixo"
 )
 
 // Provisioned by ldflags.
@@ -45,5 +45,10 @@ func main() {
 
 	log.Info().Msgf("%v %v (commit=%v date=%v by=%v)", name, version, commit, buildDate, builtBy)
 
-	fmt.Println()
+	parser := xixo.NewXMLParser(os.Stdin, os.Stdout)
+
+	err := parser.Stream()
+	if err != nil {
+		log.Err(err).Msg("Error during processing")
+	}
 }
