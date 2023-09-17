@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+
+	"github.com/rs/zerolog/log"
 )
 
 type Process struct {
@@ -15,8 +17,8 @@ type Process struct {
 	scanner *bufio.Scanner
 }
 
-func NewProcess(command string) Process {
-	return Process{command: command}
+func NewProcess(command string) *Process {
+	return &Process{command: command}
 }
 
 func (p *Process) Start() error {
@@ -57,6 +59,8 @@ func (p *Process) Stop() error {
 
 func (p *Process) Callback() CallbackJSON {
 	return func(s string) (string, error) {
+		log.Debug().Str("json", s).Msg("request edit json")
+
 		_, err := p.stdin.Write([]byte(s + "\n"))
 		if err != nil {
 			return "", err
@@ -65,6 +69,8 @@ func (p *Process) Callback() CallbackJSON {
 		if !p.scanner.Scan() {
 			return "", fmt.Errorf("command doesn't return line")
 		}
+
+		log.Debug().Str("read", p.scanner.Text()).Msg("reading from process")
 
 		return p.scanner.Text(), nil
 	}

@@ -14,3 +14,11 @@ testcases:
         assertions:
           - result.code ShouldEqual 0
           - result.systemout ShouldEqual <root><element1>innerText</element1></root>
+
+  - name: simple inputs and subscribers
+    steps:
+      - script: echo '<root><element1>innerTexta</element1></root>' | xixo --subscribers root='tee /tmp/debug | tr a b | tee /tmp/debugout '
+        assertions:
+          - result.code ShouldEqual 0
+          - result.systemerr ShouldBeEmpty
+          - result.systemout ShouldEqual <root><element1>innerTextb</element1></root>

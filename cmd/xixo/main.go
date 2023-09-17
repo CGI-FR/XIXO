@@ -42,6 +42,8 @@ var (
 	jsonlog   bool
 	debug     bool
 	colormode string
+
+	subscribers map[string]string
 )
 
 func main() {
@@ -84,6 +86,10 @@ There is NO WARRANTY, to the extent permitted by law.`, version, commit, buildDa
 		"set level of log verbosity : none (0), error (1), warn (2), info (3), debug (4), trace (5)")
 	rootCmd.PersistentFlags().BoolVar(&jsonlog, "log-json", false, "output logs in JSON format")
 	rootCmd.PersistentFlags().StringVar(&colormode, "color", "auto", "use colors in log outputs : yes, no or auto")
+	rootCmd.PersistentFlags().StringToStringVar(
+		&subscribers, "subscribers", map[string]string{},
+		"subscribers shell for matching elements",
+	)
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Err(err).Msg("error when executing command")
@@ -92,9 +98,9 @@ There is NO WARRANTY, to the extent permitted by law.`, version, commit, buildDa
 }
 
 func run(_ *cobra.Command) error {
-	parser := xixo.NewXMLParser(os.Stdin, os.Stdout)
+	driver := xixo.NewDriver(os.Stdin, os.Stdout, subscribers)
 
-	err := parser.Stream()
+	err := driver.Stream()
 	if err != nil {
 		log.Err(err).Msg("Error during processing")
 

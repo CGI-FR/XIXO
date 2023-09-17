@@ -53,6 +53,10 @@ func (x *XMLParser) RegisterCallback(match string, callback Callback) {
 	x.loopElements[match] = callback
 }
 
+func (x *XMLParser) RegisterJSONCallback(match string, callback CallbackJSON) {
+	x.loopElements[match] = XMLElementToJSONCallback(callback)
+}
+
 func (x *XMLParser) SkipElements(skipElements []string) *XMLParser {
 	if len(skipElements) > 0 {
 		for _, s := range skipElements {

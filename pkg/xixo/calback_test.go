@@ -19,6 +19,7 @@ func TestMapCallback(t *testing.T) {
 	t.Parallel()
 
 	element1 := createElement1()
+	assert.Equal(t, "<element1><child1></child1></element1>", element1.String())
 
 	editedElement1, err := xixo.XMLElementToMapCallback(mapCallback)(&element1)
 	assert.Nil(t, err)
@@ -26,6 +27,8 @@ func TestMapCallback(t *testing.T) {
 	text := editedElement1.Childs["child1"][0].InnerText
 
 	assert.Equal(t, "newChildContent", text)
+
+	assert.Equal(t, "<element1><child1>newChildContent</child1></element1>", editedElement1.String())
 }
 
 func jsonCallback(source string) (string, error) {
@@ -55,21 +58,6 @@ func TestJsonCallback(t *testing.T) {
 	text := editedElement1.Childs["child1"][0].InnerText
 
 	assert.Equal(t, "newChildContent", text)
-}
-
-func createElement1() xixo.XMLElement {
-	element1 := xixo.XMLElement{}
-
-	element1.Name = "element1"
-	element1.Childs = map[string][]xixo.XMLElement{}
-
-	child1 := xixo.XMLElement{}
-
-	child1.Name = "child1"
-
-	element1.Childs[child1.Name] = []xixo.XMLElement{child1}
-
-	return element1
 }
 
 func badJSONCallback(source string) (string, error) {

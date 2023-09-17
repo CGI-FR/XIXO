@@ -66,7 +66,7 @@ func TestModifyElement1ContentWithCallback(t *testing.T) {
 	// Résultat XML attendu avec le contenu modifié
 	expectedResultXML := `
 	<root>
-		<element1>ContenuModifie</element1>
+		<element1>ContenuModifie<name>world</name></element1>
 		<element2>Contenu2 <name> </name> ! </element2>
 	</root>`
 

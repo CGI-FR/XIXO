@@ -80,5 +80,14 @@ func (n *XMLElement) NextSibling() *XMLElement {
 }
 
 func (n *XMLElement) String() string {
-	return fmt.Sprintf("<%s>%s</%s>", n.Name, n.InnerText, n.Name)
+	xmlChilds := ""
+	for _, child := range n.Childs {
+		xmlChilds += child[0].String()
+	}
+
+	return fmt.Sprintf("<%s>%s%s</%s>",
+		n.Name,
+		n.InnerText,
+		xmlChilds,
+		n.Name)
 }
