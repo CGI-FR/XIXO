@@ -9,7 +9,7 @@ import (
 	"github.com/youen/xixo/pkg/xixo"
 )
 
-func createElement1() *xixo.XMLElement {
+func createTree() *xixo.XMLElement {
 	rootXML := `
 	<root>
 		<element1>Hello world !</element1>

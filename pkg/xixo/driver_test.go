@@ -20,6 +20,6 @@ func TestDriverSimpleEdit(t *testing.T) {
 	err := driver.Stream()
 	assert.Nil(t, err)
 
-	expected := "<root>\n  <element1>innerTexta</element1>\n</root>"
+	expected := "<root>\n  <element1>innerTextb</element1>\n</root>"
 	assert.Equal(t, expected, writer.String())
 }

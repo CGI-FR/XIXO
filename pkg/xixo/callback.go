@@ -21,10 +21,14 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 			return nil, err
 		}
 
-		for name, value := range dict {
-			children := xmlElement.Childs[name]
-			if len(children) == 1 {
-				children[0].InnerText = value
+		children, err := xmlElement.SelectElements("child::*")
+		if err != nil {
+			return nil, err
+		}
+
+		for _, child := range children {
+			if value, ok := dict[child.Name]; ok {
+				child.InnerText = value
 			}
 		}
 

@@ -15,11 +15,10 @@ func mapCallback(dict map[string]string) (map[string]string, error) {
 }
 
 // TestMapCallback should convert.
-func FixTestMapCallback(t *testing.T) {
-	t.Helper()
+func TestMapCallback(t *testing.T) {
 	t.Parallel()
 
-	element1 := createElement1()
+	element1 := createTree()
 	//nolint
 	assert.Equal(t, "<root>\n  <element1>Hello world !</element1>\n  <element2>Contenu2 </element2>\n</root>", element1.String())
 
@@ -53,14 +52,16 @@ func jsonCallback(source string) (string, error) {
 func TestJsonCallback(t *testing.T) {
 	t.Parallel()
 
-	element1 := createElement1()
+	root := createTree()
 
-	editedElement1, err := xixo.XMLElementToJSONCallback(jsonCallback)(element1)
+	editedRoot, err := xixo.XMLElementToJSONCallback(jsonCallback)(root)
 	assert.Nil(t, err)
 
-	text := editedElement1.Childs["element1"][0].InnerText
+	element1, err := editedRoot.SelectElement("element1")
 
-	assert.Equal(t, "newChildContent", text)
+	assert.Nil(t, err)
+
+	assert.Equal(t, "newChildContent", element1.InnerText)
 }
 
 func badJSONCallback(source string) (string, error) {
@@ -70,7 +71,7 @@ func badJSONCallback(source string) (string, error) {
 func TestBadJsonCallback(t *testing.T) {
 	t.Parallel()
 
-	element1 := createElement1()
+	element1 := createTree()
 
 	_, err := xixo.XMLElementToJSONCallback(badJSONCallback)(element1)
 

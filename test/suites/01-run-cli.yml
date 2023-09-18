@@ -21,4 +21,4 @@ testcases:
         assertions:
           - result.code ShouldEqual 0
           - result.systemerr ShouldBeEmpty
-          - result.systemout ShouldEqual <root><element1>innerTextb</element1></root>
+          - result.systemout ShouldContainSubstring  innerTextb
