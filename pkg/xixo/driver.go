@@ -10,7 +10,7 @@ type Driver struct {
 }
 
 func NewDriver(reader io.Reader, writer io.Writer, callbacks map[string]string) Driver {
-	parser := NewXMLParser(reader, writer)
+	parser := NewXMLParser(reader, writer).EnableXpath()
 	processes := []*Process{}
 
 	for elementName, shell := range callbacks {
