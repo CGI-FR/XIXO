@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+    <user>
+        <first_name>John</first_name>
+        <last_name>Doe</last_name>
+        <date_of_birth>1980-05-15</date_of_birth>
+        <email>john.doe@example.com</email>
+    </user>
+    <user>
+        <first_name>Alice</first_name>
+        <last_name>Smith</last_name>
+        <date_of_birth>1992-08-25</date_of_birth>
+        <email>alice.smith@example.com</email>
+    </user>
+    <!-- Add more users here -->
+</users>

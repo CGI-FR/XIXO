@@ -22,3 +22,39 @@ testcases:
           - result.code ShouldEqual 0
           - result.systemerr ShouldBeEmpty
           - result.systemout ShouldContainSubstring  innerTextb
+
+  - name: copy users
+    steps:
+      - script: cat ../data/users.xml | xixo > ../workspace/users.xml
+        assertions:
+          - result.code ShouldEqual 0
+          - result.systemerr ShouldBeEmpty
+      - script: diff ../data/users.xml ../workspace/users.xml
+        assertions:
+          - result.code ShouldEqual 0
+          - result.systemerr ShouldBeEmpty
+          - result.systemout ShouldBeEmpty
+
+  - name: copy users with attributs
+    steps:
+      - script: cat ../data/users_with_attributs.xml | xixo > ../workspace/users_with_attributs.xml
+        assertions:
+          - result.code ShouldEqual 0
+          - result.systemerr ShouldBeEmpty
+      - script: diff ../data/users_with_attributs.xml ../workspace/users_with_attributs.xml
+        assertions:
+          - result.code ShouldEqual 0
+          - result.systemerr ShouldBeEmpty
+          - result.systemout ShouldBeEmpty
+
+  # - name: copy stream content of user entities in users.xml
+  #   steps:
+  #     - script: cat ../data/users.xml | xixo --subscribers user=cat > ../workspace/users.xml
+  #       assertions:
+  #         - result.code ShouldEqual 0
+  #         - result.systemerr ShouldBeEmpty
+  #     - script: diff ../data/users.xml ../workspace/users.xml
+  #       assertions:
+  #         - result.code ShouldEqual 0
+  #         - result.systemerr ShouldBeEmpty
+  #         - result.systemout ShouldBeEmpty

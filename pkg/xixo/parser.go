@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 type XMLParser struct {
@@ -39,7 +41,17 @@ func NewXMLParser(reader io.Reader, writer io.Writer) *XMLParser {
 }
 
 func (x *XMLParser) Stream() error {
-	defer x.writer.Flush()
+	defer func() {
+		// write pending byte
+		if x.nextWrite != nil {
+			err := x.writer.WriteByte(*x.nextWrite)
+			if err != nil {
+				log.Error().Err(err).Msg("error when closing file")
+			}
+		}
+
+		x.writer.Flush()
+	}()
 
 	err := x.parse()
 	if err != nil && !errors.Is(err, io.EOF) {

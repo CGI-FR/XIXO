@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+    <!-- User 1 -->
+    <user id="1" gender="male" nationality="US">
+        <!-- Comment: User Information -->
+        <info>
+            <first_name>John</first_name>
+            <last_name>Doe</last_name>
+            <date_of_birth>1980-05-15</date_of_birth>
+            <email>john.doe@example.com</email>
+        </info>
+    </user>
+
+    <!-- User 2 -->
+    <user id="2" gender="female" nationality="UK">
+        <!-- Comment: User Information -->
+        <info>
+            <first_name>Alice</first_name>
+            <last_name>Smith</last_name>
+            <date_of_birth>1992-08-25</date_of_birth>
+            <email>alice.smith@example.com</email>
+        </info>
+    </user>
+
+    <!-- Add more users here with attributes and comments -->
+</users>
