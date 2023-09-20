@@ -1,20 +1,3 @@
-// Copyright (C) 2023 CGI France
-//
-// This file is part of XIXO.
-//
-// XIXO is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// XIXO is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with XIXO.  If not, see <http://www.gnu.org/licenses/>.
-
 package main
 
 import (
@@ -54,8 +37,9 @@ func main() {
 		Short: "Masked Input Metrics Output",
 		Long:  `XIXO is a purpose-built tool designed for edit XML file with stream process like PIMO`,
 		Example: `
-		to apply 'tr a b' shell on all text of 'element1' elements :
-			cat example_with_a.xml | xixo --element1='tr a b' > example_with_b.xml
+		to apply "jq -c '.bar |= ascii_upcase'" shell on all text of 'bar' elements of 'foo' entity:
+			$ echo '<foo><bar>a</bar></foo>' | xixo --subscribers foo="jq -c '.bar |= ascii_upcase'"
+			<foo><bar>A<bar></foo>
 		`,
 		Version: fmt.Sprintf(`%v (commit=%v date=%v by=%v)
 Copyright (C) 2021 CGI France
