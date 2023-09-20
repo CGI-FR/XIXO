@@ -9,19 +9,28 @@ import (
 	"github.com/youen/xixo/pkg/xixo"
 )
 
-func createElement1() xixo.XMLElement {
-	element1 := xixo.XMLElement{}
+func createTree() *xixo.XMLElement {
+	rootXML := `
+	<root>
+		<element1>Hello world !</element1>
+		<element2>Contenu2 </element2>
+	</root>`
 
-	element1.Name = "element1"
-	element1.Childs = map[string][]xixo.XMLElement{}
+	var root *xixo.XMLElement
 
-	child1 := xixo.XMLElement{}
+	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
+	parser.RegisterCallback("root", func(x *xixo.XMLElement) (*xixo.XMLElement, error) {
+		root = x
 
-	child1.Name = "child1"
+		return x, nil
+	})
 
-	element1.Childs[child1.Name] = []xixo.XMLElement{child1}
+	err := parser.Stream()
+	if err != nil {
+		return nil
+	}
 
-	return element1
+	return root
 }
 
 func TestElementStringShouldReturnXML(t *testing.T) {
@@ -35,7 +44,7 @@ func TestElementStringShouldReturnXML(t *testing.T) {
 
 	var root *xixo.XMLElement
 
-	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard)
+	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
 	parser.RegisterCallback("root", func(x *xixo.XMLElement) (*xixo.XMLElement, error) {
 		root = x
 
@@ -45,5 +54,36 @@ func TestElementStringShouldReturnXML(t *testing.T) {
 	err := parser.Stream()
 	assert.Nil(t, err)
 
-	assert.Equal(t, "<root><element1>Hello world !</element1><element2>Contenu2 </element2></root>", root.String())
+	expected := `<root>
+  <element1>Hello world !</element1>
+  <element2>Contenu2 </element2>
+</root>`
+
+	assert.Equal(t, expected, root.String())
+}
+
+func TestElementStringShouldReturnXMLWithSameOrder(t *testing.T) {
+	t.Parallel()
+
+	rootXML := `<root>
+  <element1>Hello world !</element1>
+  <element2>Contenu2 </element2>
+  <element3>Contenu2 </element3>
+  <element4>Contenu2 </element4>
+  <element5>Contenu2 </element5>
+</root>`
+
+	var root *xixo.XMLElement
+
+	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
+	parser.RegisterCallback("root", func(x *xixo.XMLElement) (*xixo.XMLElement, error) {
+		root = x
+
+		return x, nil
+	})
+
+	err := parser.Stream()
+	assert.Nil(t, err)
+
+	assert.Equal(t, rootXML, root.String())
 }

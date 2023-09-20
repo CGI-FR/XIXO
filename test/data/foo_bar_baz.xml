@@ -1,0 +1,12 @@
+<root>
+    <foo>
+        <bar>a</bar>
+        <baz>z</baz>
+    </foo>
+    <foo>
+        <bar>b</bar>
+    </foo>
+    <baz>
+        <bar>c</bar>
+    </baz>
+</root>

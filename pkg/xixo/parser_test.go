@@ -66,16 +66,13 @@ func TestModifyElement1ContentWithCallback(t *testing.T) {
 	// Résultat XML attendu avec le contenu modifié
 	expectedResultXML := `
 	<root>
-		<element1>ContenuModifie<name>world</name></element1>
+		<element1>ContenuModifie</element1>
 		<element2>Contenu2 <name> </name> ! </element2>
 	</root>`
 
 	// Vérifiez si le résultat XML correspond à l'attendu
 	resultXML := resultXMLBuffer.String()
-
-	if resultXML != expectedResultXML {
-		t.Errorf("Le résultat XML ne correspond pas à l'attendu.\nAttendu:\n%s\nObtenu:\n%s", expectedResultXML, resultXML)
-	}
+	assert.Equal(t, expectedResultXML, resultXML)
 }
 
 // Callback pour modifier le contenu des nœuds <element1>.
