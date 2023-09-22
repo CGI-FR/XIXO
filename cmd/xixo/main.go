@@ -82,7 +82,7 @@ There is NO WARRANTY, to the extent permitted by law.`, version, commit, buildDa
 }
 
 func run(_ *cobra.Command) error {
-	driver := xixo.NewDriver(os.Stdin, os.Stdout, subscribers)
+	driver := xixo.NewShellDriver(os.Stdin, os.Stdout, subscribers)
 
 	err := driver.Stream()
 	if err != nil {
