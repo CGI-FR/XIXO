@@ -47,6 +47,23 @@ testcases:
           - result.systemerr ShouldBeEmpty
           - result.systemout ShouldBeEmpty
 
+  - name: foo bar example
+    steps:
+      - script: cat ../data/foo_bar_baz.xml | xixo  --subscribers foo="tee ../workspace/debug_foo_bar_baz_input.jsonl | jq --unbuffered -c '.bar |= ascii_upcase' " > ../workspace/foo_bar_baz.xml
+        assertions:
+          - result.code ShouldEqual 0
+          - result.systemerr ShouldBeEmpty
+      - script: diff ../data/foo_bar_baz_expected.xml ../workspace/foo_bar_baz.xml
+        assertions:
+          - result.code ShouldEqual 0
+          - result.systemerr ShouldBeEmpty
+          - result.systemout ShouldBeEmpty
+      - script: diff ../data/debug_foo_bar_baz_input_expected.jsonl ../workspace/debug_foo_bar_baz_input.jsonl
+        assertions:
+          - result.code ShouldEqual 0
+          - result.systemerr ShouldBeEmpty
+          - result.systemout ShouldBeEmpty
+
   # - name: copy stream content of user entities in users.xml
   #   steps:
   #     - script: cat ../data/users.xml | xixo --subscribers user=cat > ../workspace/users.xml

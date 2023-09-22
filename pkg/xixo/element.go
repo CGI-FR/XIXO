@@ -1,6 +1,9 @@
 package xixo
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type XMLElement struct {
 	Name      string
@@ -90,8 +93,16 @@ func (n *XMLElement) String() string {
 		xmlChilds = "\n" + xmlChilds
 	}
 
+	attributes := n.Name + " "
+
+	for _, attr := range n.attrs {
+		attributes += fmt.Sprintf("%s=\"%s\" ", attr.name, attr.value)
+	}
+
+	attributes = strings.Trim(attributes, " ")
+
 	return fmt.Sprintf("<%s>%s%s</%s>",
-		n.Name,
+		attributes,
 		n.InnerText,
 		xmlChilds,
 		n.Name)

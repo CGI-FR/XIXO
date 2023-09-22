@@ -1,12 +1,12 @@
 <root>
-    <foo>
-        <bar>a</bar>
-        <baz>z</baz>
-    </foo>
-    <foo>
-        <bar>b</bar>
-    </foo>
-    <baz>
-        <bar>c</bar>
-    </baz>
+  <foo>
+    <bar>a</bar>
+    <baz fuz="faz">z</baz>
+  </foo>
+  <foo>
+    <bar>b</bar>
+  </foo>
+  <baz>
+    <bar>c</bar>
+  </baz>
 </root>
