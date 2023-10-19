@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taxes>
+    <account location="New York">
+        <name gender="male" age="23">Doe John</name>
+        <account_number>12345</account_number>
+    </account>
+</taxes>
