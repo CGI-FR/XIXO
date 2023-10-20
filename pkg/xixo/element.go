@@ -99,8 +99,8 @@ func (n *XMLElement) String() string {
 
 	attributes := n.Name + " "
 
-	for _, attr := range n.attrs {
-		attributes += fmt.Sprintf("%s=\"%s\" ", attr.name, attr.value)
+	for key, value := range n.Attrs {
+		attributes += fmt.Sprintf("%s=\"%s\" ", key, value)
 	}
 
 	attributes = strings.Trim(attributes, " ")

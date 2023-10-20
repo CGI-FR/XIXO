@@ -120,3 +120,17 @@ func TestAddAttributsShouldSaved(t *testing.T) {
 	expected := map[string]string{"foo": "bar"}
 	assert.Equal(t, root.Attrs, expected)
 }
+
+func TestAddAttributsShouldInOutputWithString(t *testing.T) {
+	t.Parallel()
+
+	var root *xixo.XMLElement
+	name := "root"
+	root = xixo.NewXMLElement()
+	root.Name = name
+	root.InnerText = "Hello"
+	root.AddAttribut("foo", "bar")
+
+	expected := "<root foo=\"bar\">Hello</root>"
+	assert.Equal(t, expected, root.String())
+}
