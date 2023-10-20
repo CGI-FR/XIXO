@@ -97,9 +97,9 @@ func TestCreatNewXMLElement(t *testing.T) {
 
 	var root *xixo.XMLElement
 	name := "root"
-	attrs := map[string]string{}
 	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
-	root = xixo.NewXMLElement(name, attrs)
+	root = xixo.NewXMLElement()
+	root.Name = name
 	err := parser.Stream()
 	assert.Nil(t, err)
 	expected := `<root></root>`
@@ -110,21 +110,13 @@ func TestCreatNewXMLElement(t *testing.T) {
 func TestAddAttributsShouldSaved(t *testing.T) {
 	t.Parallel()
 
-	rootXML := `
-	<root>
-	</root>`
-
 	var root *xixo.XMLElement
 
 	name := "root"
-	attrs := map[string]string{}
-	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
-	root = xixo.NewXMLElement(name, attrs)
+	root = xixo.NewXMLElement()
+	root.Name = name
 
 	root.AddAttribut("foo", "bar")
-	err := parser.Stream()
-	assert.Nil(t, err)
-	expected := `<root foo="bar"></root>`
-
-	assert.Equal(t, expected, root.String())
+	expected := map[string]string{"foo": "bar"}
+	assert.Equal(t, root.Attrs, expected)
 }

@@ -119,10 +119,10 @@ func (n *XMLElement) AddAttribut(name string, value string) {
 	n.Attrs[name] = value
 }
 
-func NewXMLElement(name string, attrs map[string]string) *XMLElement {
+func NewXMLElement() *XMLElement {
 	return &XMLElement{
-		Name:      name,
-		Attrs:     attrs,
+		Name:      "",
+		Attrs:     map[string]string{},
 		InnerText: "",
 		Childs:    map[string][]XMLElement{},
 		Err:       nil,
