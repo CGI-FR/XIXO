@@ -87,3 +87,44 @@ func TestElementStringShouldReturnXMLWithSameOrder(t *testing.T) {
 
 	assert.Equal(t, rootXML, root.String())
 }
+
+func TestCreatNewXMLElement(t *testing.T) {
+	t.Parallel()
+
+	rootXML := `
+	<root>
+	</root>`
+
+	var root *xixo.XMLElement
+	name := "root"
+	attrs := map[string]string{}
+	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
+	root = xixo.NewXMLElement(name, attrs)
+	err := parser.Stream()
+	assert.Nil(t, err)
+	expected := `<root></root>`
+
+	assert.Equal(t, expected, root.String())
+}
+
+func TestAddAttributsShouldSaved(t *testing.T) {
+	t.Parallel()
+
+	rootXML := `
+	<root>
+	</root>`
+
+	var root *xixo.XMLElement
+
+	name := "root"
+	attrs := map[string]string{}
+	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
+	root = xixo.NewXMLElement(name, attrs)
+
+	root.AddAttribut("foo", "bar")
+	err := parser.Stream()
+	assert.Nil(t, err)
+	expected := `<root foo="bar"></root>`
+
+	assert.Equal(t, expected, root.String())
+}

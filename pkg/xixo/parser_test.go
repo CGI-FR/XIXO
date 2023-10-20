@@ -125,7 +125,7 @@ func TestAttributsShouldSavedAfterParser(t *testing.T) {
 	t.Parallel()
 	// Fichier XML en entrée
 	inputXML := `
-	<root>
+	<root name="start">
 		<name age="12" gender="male">Hello</name>
 	</root>`
 
@@ -144,7 +144,7 @@ func TestAttributsShouldSavedAfterParser(t *testing.T) {
 
 	// Résultat XML attendu avec le contenu modifié et attributs restés
 	expectedResultXML := `
-	<root>
+	<root name="start">
 		<name age="12" gender="male">ContenuModifie</name>
 	</root>`
 
@@ -155,40 +155,3 @@ func TestAttributsShouldSavedAfterParser(t *testing.T) {
 		t.Errorf("Le résultat XML ne correspond pas à l'attendu.\nAttendu:\n%s\nObtenu:\n%s", expectedResultXML, resultXML)
 	}
 }
-
-// func TestTagWithSlashShouldSaved(t *testing.T) {
-// 	t.Parallel()
-// 	// Fichier XML en entrée
-// 	inputXML := `
-// 	<root>
-// 		<name age="12" gender="male">Hello</name>
-// 		<name />Hello</name />
-// 	</root>`
-
-// 	// Lisez les résultats du canal et construisez le XML résultant
-// 	var resultXMLBuffer bytes.Buffer
-
-// 	// Créez un bufio.Reader à partir du XML en entrée
-// 	reader := bytes.NewBufferString(inputXML)
-
-// 	// Créez une nouvelle instance du parser XML avec la fonction de rappel et xPath
-// 	parser := xixo.NewXMLParser(reader, &resultXMLBuffer).EnableXpath()
-// 	parser.RegisterCallback("name", modifyElement1Content)
-// 	// Créez un canal pour collecter les résultats du parser
-// 	err := parser.Stream()
-// 	assert.Nil(t, err)
-
-// 	// Résultat XML attendu avec le contenu modifié et attributs restés
-// 	expectedResultXML := `
-// 	<root>
-// 		<name age="12" gender="male">ContenuModifie</name>
-// 		<name />Hello</name />
-// 	</root>`
-
-// 	// Vérifiez si le résultat XML correspond à l'attendu
-// 	resultXML := resultXMLBuffer.String()
-
-// 	if resultXML != expectedResultXML {
-// 		t.Errorf("Le résultat XML ne correspond pas à l'attendu.\nAttendu:\n%s\nObtenu:\n%s", expectedResultXML, resultXML)
-// 	}
-// }

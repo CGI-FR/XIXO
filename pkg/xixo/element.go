@@ -35,6 +35,10 @@ func (n *XMLElement) SelectElement(exp string) (*XMLElement, error) {
 }
 
 func (n *XMLElement) FirstChild() *XMLElement {
+	if n.childs == nil {
+		return nil
+	}
+
 	if len(n.childs) > 0 {
 		return n.childs[0]
 	}
@@ -106,4 +110,26 @@ func (n *XMLElement) String() string {
 		n.InnerText,
 		xmlChilds,
 		n.Name)
+}
+
+func (n *XMLElement) AddAttribut(name string, value string) {
+	if n.Attrs == nil {
+		n.Attrs = make(map[string]string)
+	}
+	n.Attrs[name] = value
+}
+
+func NewXMLElement(name string, attrs map[string]string) *XMLElement {
+	return &XMLElement{
+		Name:      name,
+		Attrs:     attrs,
+		InnerText: "",
+		Childs:    map[string][]XMLElement{},
+		Err:       nil,
+		childs:    []*XMLElement{},
+		parent:    nil,
+		attrs:     []*xmlAttr{},
+		localName: "",
+		prefix:    "",
+	}
 }

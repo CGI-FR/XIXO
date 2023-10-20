@@ -77,3 +77,28 @@ func TestBadJsonCallback(t *testing.T) {
 
 	assert.NotNil(t, err)
 }
+
+func TestMapCallbackWithAttributs(t *testing.T) {
+	t.Parallel()
+
+	element1 := createTree()
+	//nolint
+	assert.Equal(t, "<root>\n  <element1 age='22'>Hello world !</element1>\n  <element2>Contenu2 </element2>\n</root>", element1.String())
+
+	editedElement1, err := xixo.XMLElementToMapCallback(mapCallbackAttributs)(element1)
+	assert.Nil(t, err)
+
+	text := editedElement1.FirstChild().InnerText
+
+	assert.Equal(t, "newChildContent", text)
+
+	//nolint
+	assert.Equal(t, "<root>\n  <element1 age='50'>newChildContent</element1>\n  <element2>Contenu2 </element2>\n</root>", editedElement1.String())
+}
+
+func mapCallbackAttributs(dict map[string]string) (map[string]string, error) {
+	dict["element1@age"] = "50"
+	dict["element1"] = "newChildContent"
+
+	return dict, nil
+}
