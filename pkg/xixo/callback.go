@@ -27,13 +27,18 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 		if err != nil {
 			return nil, err
 		}
-
+		parentAttributs := extractAttributesParent(dict)
+		if parentAttributs != nil {
+			for _, attr := range parentAttributs {
+				xmlElement.AddAttribut(attr.Name, attr.Value)
+			}
+		}
 		children, err := xmlElement.SelectElements("child::*")
 		if err != nil {
 			return nil, err
 		}
 
-		AttributsList := exctratAttributs(dict, xmlElement.Name)
+		AttributsList := exctratAttributsChild(dict)
 
 		for _, child := range children {
 
@@ -55,23 +60,13 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 	return result
 }
 
-func exctratAttributs(dict map[string]string, parentName string) map[string][]Attributs {
+func exctratAttributsChild(dict map[string]string) map[string][]Attributs {
 	AttributsList := make(map[string][]Attributs)
 	// check dict[name] include "@"
 	for key, value := range dict {
 		parts := strings.SplitN(key, "@", 2)
 		// if include, use split to get element:before@ ,attr:after@
-		if len(parts) == 1 {
-			tagName := parentName
-			newAttribut := Attributs{Name: parts[0], Value: value}
-
-			if existingElement, ok := AttributsList[tagName]; ok {
-				existingElement = append(existingElement, newAttribut)
-				AttributsList[tagName] = existingElement
-			} else {
-				AttributsList[tagName] = []Attributs{newAttribut}
-			}
-		} else if len(parts) == 2 {
+		if len(parts) == 2 {
 
 			tagName := parts[0]
 			newAttribut := Attributs{Name: parts[1], Value: value}
@@ -87,6 +82,19 @@ func exctratAttributs(dict map[string]string, parentName string) map[string][]At
 		}
 	}
 	return AttributsList
+}
+
+func extractAttributesParent(dict map[string]string) []Attributs {
+	AttributesMap := []Attributs{}
+	for key, value := range dict {
+		if strings.HasPrefix(key, "@") {
+			attributeKey := key[1:]
+			attribute := Attributs{Name: attributeKey, Value: value}
+			AttributesMap = append(AttributesMap, attribute)
+		}
+	}
+
+	return AttributesMap
 }
 
 func XMLElementToJSONCallback(callback CallbackJSON) Callback {
