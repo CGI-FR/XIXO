@@ -2,7 +2,7 @@ package xixo
 
 import (
 	"encoding/json"
-	"regexp"
+	"strings"
 )
 
 type Callback func(*XMLElement) (*XMLElement, error)
@@ -12,14 +12,13 @@ type CallbackMap func(map[string]string) (map[string]string, error)
 type CallbackJSON func(string) (string, error)
 
 type Attributs struct {
-	Attr    string
-	AttrVal string
+	Name  string
+	Value string
 }
 
 func XMLElementToMapCallback(callback CallbackMap) Callback {
 	result := func(xmlElement *XMLElement) (*XMLElement, error) {
 		dict := map[string]string{}
-		var AttributsList map[string][]Attributs
 		for name, child := range xmlElement.Childs {
 			dict[name] = child[0].InnerText
 		}
@@ -34,45 +33,60 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 			return nil, err
 		}
 
-		// check dict[name] include "@"
-		re := regexp.MustCompile("@")
-		for key, value := range dict {
-			if re.MatchString(key) {
-				// if include, use regexp to get element:before@ ,attr:after@
-				parts := re.Split(key, 2)
-				tagName := parts[0]
-				newAttribut := Attributs{Attr: parts[1], AttrVal: value}
-				if existingElement, ok := AttributsList[tagName]; ok {
-					// if key already in attributs
-					existingElement = append(existingElement, newAttribut)
-					AttributsList[tagName] = existingElement
-				} else {
-					// if key not in attributs yet
-					AttributsList[tagName] = []Attributs{newAttribut}
-				}
-			}
-		}
+		AttributsList := exctratAttributs(dict, xmlElement.Name)
 
 		for _, child := range children {
-			// if attrlist, ok := AttributsList[child.Name]; ok {
-			// 	if child.Attrs == nil {
 
-			// 	}
-			// 	child.InnerText = value
-			// }
-			// if xmlElement.Attrs == nil
-
-			// creat one
-			// apprend {} to Attrs
 			if value, ok := dict[child.Name]; ok {
 				child.InnerText = value
 			}
+
+			if attributes, ok := AttributsList[child.Name]; ok {
+				for _, attr := range attributes {
+					child.AddAttribut(attr.Name, attr.Value)
+				}
+			}
+
 		}
 
 		return xmlElement, nil
 	}
 
 	return result
+}
+
+func exctratAttributs(dict map[string]string, parentName string) map[string][]Attributs {
+	AttributsList := make(map[string][]Attributs)
+	// check dict[name] include "@"
+	for key, value := range dict {
+		parts := strings.SplitN(key, "@", 2)
+		// if include, use split to get element:before@ ,attr:after@
+		if len(parts) == 1 {
+			tagName := parentName
+			newAttribut := Attributs{Name: parts[0], Value: value}
+
+			if existingElement, ok := AttributsList[tagName]; ok {
+				existingElement = append(existingElement, newAttribut)
+				AttributsList[tagName] = existingElement
+			} else {
+				AttributsList[tagName] = []Attributs{newAttribut}
+			}
+		} else if len(parts) == 2 {
+
+			tagName := parts[0]
+			newAttribut := Attributs{Name: parts[1], Value: value}
+
+			// if key already in attributs
+			if existingElement, ok := AttributsList[tagName]; ok {
+
+				existingElement = append(existingElement, newAttribut)
+				AttributsList[tagName] = existingElement
+			} else {
+				AttributsList[tagName] = []Attributs{newAttribut}
+			}
+		}
+	}
+	return AttributsList
 }
 
 func XMLElementToJSONCallback(callback CallbackJSON) Callback {

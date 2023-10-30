@@ -33,6 +33,54 @@ func createTree() *xixo.XMLElement {
 	return root
 }
 
+func createTreeWithAttribut() *xixo.XMLElement {
+	rootXML := `
+	<root>
+		<element1 age="22">Hello world !</element1>
+		<element2>Contenu2 </element2>
+	</root>`
+
+	var root *xixo.XMLElement
+
+	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
+	parser.RegisterCallback("root", func(x *xixo.XMLElement) (*xixo.XMLElement, error) {
+		root = x
+
+		return x, nil
+	})
+
+	err := parser.Stream()
+	if err != nil {
+		return nil
+	}
+
+	return root
+}
+
+func createTreeWithAttributParent() *xixo.XMLElement {
+	rootXML := `
+	<root type="foo">
+		<element1 age="22" sex="male">Hello world !</element1>
+		<element2>Contenu2 </element2>
+	</root>`
+
+	var root *xixo.XMLElement
+
+	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
+	parser.RegisterCallback("root", func(x *xixo.XMLElement) (*xixo.XMLElement, error) {
+		root = x
+
+		return x, nil
+	})
+
+	err := parser.Stream()
+	if err != nil {
+		return nil
+	}
+
+	return root
+}
+
 func TestElementStringShouldReturnXML(t *testing.T) {
 	t.Parallel()
 
@@ -125,12 +173,27 @@ func TestAddAttributsShouldInOutputWithString(t *testing.T) {
 	t.Parallel()
 
 	var root *xixo.XMLElement
-	name := "root"
 	root = xixo.NewXMLElement()
-	root.Name = name
+	root.Name = "root"
 	root.InnerText = "Hello"
 	root.AddAttribut("foo", "bar")
 
 	expected := "<root foo=\"bar\">Hello</root>"
+	assert.Equal(t, expected, root.String())
+}
+
+func TestEditAttributsShouldInOutputWithString(t *testing.T) {
+	t.Parallel()
+
+	var root *xixo.XMLElement
+	root = xixo.NewXMLElement()
+	root.Name = "root"
+	root.InnerText = "Hello"
+	root.AddAttribut("foo", "bar")
+
+	expected := "<root foo=\"bar\">Hello</root>"
+	assert.Equal(t, expected, root.String())
+	root.AddAttribut("foo", "bas")
+	expected = "<root foo=\"bas\">Hello</root>"
 	assert.Equal(t, expected, root.String())
 }

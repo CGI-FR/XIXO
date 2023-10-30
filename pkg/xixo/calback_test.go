@@ -81,9 +81,9 @@ func TestBadJsonCallback(t *testing.T) {
 func TestMapCallbackWithAttributs(t *testing.T) {
 	t.Parallel()
 
-	element1 := createTree()
+	element1 := createTreeWithAttribut()
 	//nolint
-	assert.Equal(t, "<root>\n  <element1 age='22'>Hello world !</element1>\n  <element2>Contenu2 </element2>\n</root>", element1.String())
+	assert.Equal(t, "<root>\n  <element1 age=\"22\">Hello world !</element1>\n  <element2>Contenu2 </element2>\n</root>", element1.String())
 
 	editedElement1, err := xixo.XMLElementToMapCallback(mapCallbackAttributs)(element1)
 	assert.Nil(t, err)
@@ -93,7 +93,7 @@ func TestMapCallbackWithAttributs(t *testing.T) {
 	assert.Equal(t, "newChildContent", text)
 
 	//nolint
-	assert.Equal(t, "<root>\n  <element1 age='50'>newChildContent</element1>\n  <element2>Contenu2 </element2>\n</root>", editedElement1.String())
+	assert.Equal(t, "<root>\n  <element1 age=\"50\">newChildContent</element1>\n  <element2>Contenu2 </element2>\n</root>", editedElement1.String())
 }
 
 func mapCallbackAttributs(dict map[string]string) (map[string]string, error) {
