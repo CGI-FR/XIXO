@@ -8,8 +8,10 @@ import (
 	"github.com/youen/xixo/pkg/xixo"
 )
 
+const newChildContent = "newChildContent"
+
 func mapCallback(dict map[string]string) (map[string]string, error) {
-	dict["element1"] = "newChildContent"
+	dict["element1"] = newChildContent
 
 	return dict, nil
 }
@@ -41,7 +43,7 @@ func jsonCallback(source string) (string, error) {
 		return "", err
 	}
 
-	dict["element1"] = "newChildContent"
+	dict["element1"] = newChildContent
 
 	result, err := json.Marshal(dict)
 
@@ -98,7 +100,7 @@ func TestMapCallbackWithAttributs(t *testing.T) {
 
 func mapCallbackAttributs(dict map[string]string) (map[string]string, error) {
 	dict["element1@age"] = "50"
-	dict["element1"] = "newChildContent"
+	dict["element1"] = newChildContent
 
 	return dict, nil
 }
@@ -124,7 +126,7 @@ func TestMapCallbackWithAttributsParentAndChilds(t *testing.T) {
 func mapCallbackAttributsWithParent(dict map[string]string) (map[string]string, error) {
 	dict["@type"] = "bar"
 	dict["element1@age"] = "50"
-	dict["element1"] = "newChildContent"
+	dict["element1"] = newChildContent
 	dict["element2@age"] = "25"
 
 	return dict, nil

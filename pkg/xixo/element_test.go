@@ -9,6 +9,8 @@ import (
 	"github.com/youen/xixo/pkg/xixo"
 )
 
+const parentTag = "root"
+
 func createTree() *xixo.XMLElement {
 	rootXML := `
 	<root>
@@ -144,12 +146,15 @@ func TestCreatNewXMLElement(t *testing.T) {
 	</root>`
 
 	var root *xixo.XMLElement
-	name := "root"
+
+	name := parentTag
 	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
 	root = xixo.NewXMLElement()
 	root.Name = name
 	err := parser.Stream()
+
 	assert.Nil(t, err)
+
 	expected := `<root></root>`
 
 	assert.Equal(t, expected, root.String())
@@ -160,23 +165,24 @@ func TestAddAttributsShouldSaved(t *testing.T) {
 
 	var root *xixo.XMLElement
 
-	name := "root"
+	name := parentTag
 	root = xixo.NewXMLElement()
 	root.Name = name
 
-	root.AddAttribut("foo", "bar")
+	root.AddAttribute("foo", "bar")
+
 	expected := map[string]string{"foo": "bar"}
+
 	assert.Equal(t, root.Attrs, expected)
 }
 
 func TestAddAttributsShouldInOutputWithString(t *testing.T) {
 	t.Parallel()
 
-	var root *xixo.XMLElement
-	root = xixo.NewXMLElement()
-	root.Name = "root"
+	root := xixo.NewXMLElement()
+	root.Name = parentTag
 	root.InnerText = "Hello"
-	root.AddAttribut("foo", "bar")
+	root.AddAttribute("foo", "bar")
 
 	expected := "<root foo=\"bar\">Hello</root>"
 	assert.Equal(t, expected, root.String())
@@ -185,15 +191,15 @@ func TestAddAttributsShouldInOutputWithString(t *testing.T) {
 func TestEditAttributsShouldInOutputWithString(t *testing.T) {
 	t.Parallel()
 
-	var root *xixo.XMLElement
-	root = xixo.NewXMLElement()
-	root.Name = "root"
+	root := xixo.NewXMLElement()
+	root.Name = parentTag
 	root.InnerText = "Hello"
-	root.AddAttribut("foo", "bar")
+	root.AddAttribute("foo", "bar")
 
 	expected := "<root foo=\"bar\">Hello</root>"
 	assert.Equal(t, expected, root.String())
-	root.AddAttribut("foo", "bas")
+	root.AddAttribute("foo", "bas")
+
 	expected = "<root foo=\"bas\">Hello</root>"
 	assert.Equal(t, expected, root.String())
 }

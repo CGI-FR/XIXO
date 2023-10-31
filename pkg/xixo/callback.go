@@ -11,11 +11,13 @@ type CallbackMap func(map[string]string) (map[string]string, error)
 
 type CallbackJSON func(string) (string, error)
 
-type Attributs struct {
+type Attribute struct {
 	Name  string
 	Value string
 }
 
+// XMLElementToMapCallback transforms an XML element into a map, applies a callback function,
+// adds parent attributes, and updates child elements.
 func XMLElementToMapCallback(callback CallbackMap) Callback {
 	result := func(xmlElement *XMLElement) (*XMLElement, error) {
 		dict := map[string]string{}
@@ -27,31 +29,29 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 		if err != nil {
 			return nil, err
 		}
-		parentAttributs := extractAttributesParent(dict)
-		if parentAttributs != nil {
-			for _, attr := range parentAttributs {
-				xmlElement.AddAttribut(attr.Name, attr.Value)
-			}
+		// Extract parent attributes and add them to the XML element.
+		parentAttributes := extractParentAttributes(dict)
+		for _, attr := range parentAttributes {
+			xmlElement.AddAttribute(attr.Name, attr.Value)
 		}
+
 		children, err := xmlElement.SelectElements("child::*")
 		if err != nil {
 			return nil, err
 		}
-
-		AttributsList := exctratAttributsChild(dict)
+		// Select child elements and update their text content and attributes.
+		childAttributes := extractChildAttributes(dict)
 
 		for _, child := range children {
-
 			if value, ok := dict[child.Name]; ok {
 				child.InnerText = value
 			}
 
-			if attributes, ok := AttributsList[child.Name]; ok {
+			if attributes, ok := childAttributes[child.Name]; ok {
 				for _, attr := range attributes {
-					child.AddAttribut(attr.Name, attr.Value)
+					child.AddAttribute(attr.Name, attr.Value)
 				}
 			}
-
 		}
 
 		return xmlElement, nil
@@ -60,41 +60,41 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 	return result
 }
 
-func exctratAttributsChild(dict map[string]string) map[string][]Attributs {
-	AttributsList := make(map[string][]Attributs)
+// extractChildAttributes extracts child attributes from the dictionary.
+func extractChildAttributes(dict map[string]string) map[string][]Attribute {
+	childAttributes := make(map[string][]Attribute)
 	// check dict[name] include "@"
 	for key, value := range dict {
 		parts := strings.SplitN(key, "@", 2)
-		// if include, use split to get element:before@ ,attr:after@
+
 		if len(parts) == 2 {
-
 			tagName := parts[0]
-			newAttribut := Attributs{Name: parts[1], Value: value}
-
-			// if key already in attributs
-			if existingElement, ok := AttributsList[tagName]; ok {
-
-				existingElement = append(existingElement, newAttribut)
-				AttributsList[tagName] = existingElement
+			newAttribut := Attribute{Name: parts[1], Value: value}
+			// if key already in attributes
+			if existingElement, ok := childAttributes[tagName]; ok {
+				childAttributes[tagName] = append(existingElement, newAttribut)
 			} else {
-				AttributsList[tagName] = []Attributs{newAttribut}
+				childAttributes[tagName] = []Attribute{newAttribut}
 			}
 		}
 	}
-	return AttributsList
+
+	return childAttributes
 }
 
-func extractAttributesParent(dict map[string]string) []Attributs {
-	AttributesMap := []Attributs{}
+// extractParentAttributes extracts parent attributes from the dictionary.
+func extractParentAttributes(dict map[string]string) []Attribute {
+	parentAttributes := []Attribute{}
+
 	for key, value := range dict {
 		if strings.HasPrefix(key, "@") {
 			attributeKey := key[1:]
-			attribute := Attributs{Name: attributeKey, Value: value}
-			AttributesMap = append(AttributesMap, attribute)
+			attribute := Attribute{Name: attributeKey, Value: value}
+			parentAttributes = append(parentAttributes, attribute)
 		}
 	}
 
-	return AttributesMap
+	return parentAttributes
 }
 
 func XMLElementToJSONCallback(callback CallbackJSON) Callback {

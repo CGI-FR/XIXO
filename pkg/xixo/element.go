@@ -8,6 +8,7 @@ import (
 type XMLElement struct {
 	Name      string
 	Attrs     map[string]string
+	AttrKeys  []string
 	InnerText string
 	Childs    map[string][]XMLElement
 	Err       error
@@ -112,10 +113,11 @@ func (n *XMLElement) String() string {
 		n.Name)
 }
 
-func (n *XMLElement) AddAttribut(name string, value string) {
+func (n *XMLElement) AddAttribute(name string, value string) {
 	if n.Attrs == nil {
 		n.Attrs = make(map[string]string)
 	}
+
 	n.Attrs[name] = value
 }
 
@@ -123,6 +125,7 @@ func NewXMLElement() *XMLElement {
 	return &XMLElement{
 		Name:      "",
 		Attrs:     map[string]string{},
+		AttrKeys:  make([]string, 0),
 		InnerText: "",
 		Childs:    map[string][]XMLElement{},
 		Err:       nil,
