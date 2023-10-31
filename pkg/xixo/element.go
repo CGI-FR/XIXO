@@ -99,9 +99,8 @@ func (n *XMLElement) String() string {
 	}
 
 	attributes := n.Name + " "
-
-	for key, value := range n.Attrs {
-		attributes += fmt.Sprintf("%s=\"%s\" ", key, value)
+	for _, key := range n.AttrKeys {
+		attributes += fmt.Sprintf("%s=\"%s\" ", key, n.Attrs[key])
 	}
 
 	attributes = strings.Trim(attributes, " ")
@@ -117,7 +116,12 @@ func (n *XMLElement) AddAttribute(name string, value string) {
 	if n.Attrs == nil {
 		n.Attrs = make(map[string]string)
 	}
-
+	// if name don't exsite in Attrs yet
+	if _, ok := n.Attrs[name]; !ok {
+		// Add un key in slice to keep the order of attributes
+		n.AttrKeys = append(n.AttrKeys, name)
+	}
+	// change the value of attribute
 	n.Attrs[name] = value
 }
 
