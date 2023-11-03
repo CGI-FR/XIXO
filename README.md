@@ -1,86 +1,57 @@
 
 # XIXO - XML Input XML Output
 
-**XIXO** is a versatile command-line tool designed for seamless XML input and XML output operations. It empowers you to manipulate XML content effortlessly, offering a range of features for both basic and advanced operations. This README provides a comprehensive guide to **XIXO**, including installation instructions, usage examples, and acknowledgments to the open-source community.
+**XIXO** is a Go library that allows you to parse XML files and extract custom attributes. It empowers you to manipulate XML content effortlessly, offering a range of features for both basic and advanced operations. This README provides a comprehensive guide to **XIXO**, including installation instructions, usage examples, and acknowledgments to the open-source community.
 
 ## Installation
 
-To install xixo, follow these steps:
+To install xixo,  you can use go get:
 
-- Download the right release for your operating system and architecture from the xixo releases page.
-
-- Extract the xixo binary from the downloaded archive.
-
-- Move the xixo binary to a directory that is included in your system's PATH. This step is essential to make xixo accessible from any location in your terminal.
-
-Note: If you are not sure which directory to use, you can typically place it in /usr/local/bin or ~/bin (for Linux/macOS) or C:\Windows\System32 (for Windows). You may need administrator privileges to move the binary to some directories.
-
-- Verify the installation by running the following command in your terminal:
-
-```bash
-$ xixo --version
 ```
-
-If installed correctly, it should display the version of xixo.
+go get github.com/CGI-FR/XIXO
+```
 
 Now, you can start using xixo to edit XML files with ease.
 
 ## Example
 
-### Input XML
+To use **XIXO**, you need to create a Parser object with the path of the XML file to parse and the name of element, here is a emexple of XML file: (same exemple in Unit testing **TestMapCallbackWithAttributsParentAndChilds()** in callback_test.go )
 
 ```xml
-<root>
-    <foo>
-        <bar>a</bar>
-        <baz>z</baz>
-    </foo>
-    <foo>
-        <bar>b</bar>
-    </foo>
-    <baz>
-        <bar>c</bar>
-    </baz>
-</root>
-```
-
-### Command
-
-```shell
-$ xixo  --subscribers foo="tee debug.jsonl | jq --unbuffered -c '.bar |= ascii_upcase' " < test/data/foo_bar_baz.xml
-<root>
-    <foo>
-        <bar>A</bar>
-        <baz>z</baz>
-    </foo>
-    <foo>
-        <bar>B</bar>
-    </foo>
-    <baz>
-        <bar>c</bar>
-    </baz>
+<root type="foo">
+    <element1 age="22" sex="male">Hello world !</element1>
+    <element2>Contenu2 </element2>
 </root>
 ```
 
 ### Process Description
 
-1. **Initialization**: **xixo** begins by parsing the input XML file in a streaming manner. It identifies the structure of the XML and locates elements that match the subscriber criteria (`foo` elements in this case).
+1. **Initialization**: **xixo** begins by parsing the input XML file in a streaming manner. It identifies the structure of the XML and locates elements that match the begin element name. (`root` elements in this case).
 
-2. **Subscriber Script Execution**: The subscriber script (`tee debug.jsonl | jq --unbuffered -c '.bar |= ascii_upcase'`) is executed once at the beginning of the parsing process, as indicated. It's important to note that the script is not called separately for each `foo` element but rather only once as the input is piped from **xixo**. The script performs the following steps:
+2. **Transform XML to Go map** As the XML parsing progresses, **xixo** reads the XML file and creat a element tree of root element. In exemple will be:
 
-    - It starts by using `tee` to write matched elements (e.g., `<foo><bar>a</bar><baz>z</baz></foo>`) as JSON lines, such as `{"bar":"a","baz":"z"}`, to the `debug.jsonl` file.
-    - It then uses `jq` to apply the transformation to the `bar` element within the JSON content. The `ascii_upcase` function is used to convert the text within the `bar` element to uppercase. The `--unbuffered` flag ensures that **jq** processes the input line by line.
-    - The script generates modified JSON lines, such as `{"bar":"A","baz":"z"}` and `{"bar":"B"}`, and writes them to the standard output.
+```go
+{"@type":"foo","element1":"Hello world !","element1@age":"22","element1":"male","element2":"Contenu2 "}.
+```
 
-3. **Merging JSON Output**: As the XML parsing progresses, **xixo** reads the JSON lines from the script's standard output. Each line of JSON data corresponds to a `foo` element in the XML. **xixo** combines this JSON data with the current matching XML element to produce the updated XML structure with the transformations applied. The modified XML is then emitted as output in a streaming manner.
+3. **Edite element value and attribute value with callback**: For modify the data, we need give callback function a map with the element name as key, new data as value. In exemple we give a map like this:
 
-4. **Final Output**: The final XML output, with the transformations applied to the `bar` elements within the `foo` elements.
+```go
+{"@type":"bar","element1@age":"50","element1":"newChildContent","element2@age":"25"}.
+```
+
+4. **Final Output**: The final XML output will be:
+
+```xml
+<root type="bar">
+    <element1 age="50" sex="male">newChildContent</element1>
+    <element2 age="25">Contenu2 </element2>
+</root>
+```
 
 ### Key Points
 
-- **Subscriber Script Execution**: The subscriber script is executed only once at the beginning of the parsing process and then stopped at the end. It processes the XML elements as they match the criteria and serializes them into JSON lines, which are then merged with the corresponding XML elements to produce the modified XML output.
-
-- **Performance Optimization**: **xixo** optimizes performance by not calling the subscriber script for each `foo` element separately but rather processing the input in a stream and merging the results efficiently.
+- **Performance Optimization**: **xixo** optimizes performance by not calling the subscriber script for each `root` element separately but rather processing the input in a stream and merging the results efficiently.
 
 This detailed process demonstrates how **xixo** processes XML files in a streaming and efficient manner, applying custom transformations to specific elements using subscribers.
 

@@ -24,4 +24,4 @@ Details are available on [the official Visual Studio documentation](https://code
 - [ ] The code you added/modified **compile** (run the `neon compile` command)
 - [ ] The code you added/modified **is linted** (run the `neon lint` command)
 - [ ] The code you added/modified **is covered by unit tests** and **all tests are passing** (run the `neon test` command)
-- [ ] The features you added/modified or the bugs you fixed **are covered by integration tests** and **all integration tests are passing** (run the `neon test-int` command)
+
