@@ -467,12 +467,7 @@ search_close_tag:
 		if x.isWS(cur) {
 			continue
 		}
-
 		if cur == '=' {
-			if result.Attrs == nil {
-				result.Attrs = map[string]string{}
-			}
-
 			cur, err = x.readByte()
 
 			if err != nil {
@@ -488,10 +483,10 @@ search_close_tag:
 			if err != nil {
 				return nil, false, x.defaultError()
 			}
-			result.Attrs[attr] = attrVal
-			if x.xpathEnabled {
-				result.attrs = append(result.attrs, &xmlAttr{name: attr, value: attrVal})
-			}
+			result.AddAttribute(attr, attrVal)
+			// if x.xpathEnabled {
+			// 	result.attrs = append(result.attrs, &xmlAttr{name: attr, value: attrVal})
+			// }
 			x.scratch.reset()
 
 			continue

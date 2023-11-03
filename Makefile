@@ -60,10 +60,6 @@ release-%: warning
 release: warning
 	@neon release
 
-.PHONY: test-int
-test-int: warning
-	@neon test-int
-
 .PHONY: publish-%
 publish-%: warning
 	@neon -props "{buildpaths: ["cmd/$*"]}" publish

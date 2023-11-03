@@ -8,6 +8,7 @@ import (
 type XMLElement struct {
 	Name      string
 	Attrs     map[string]string
+	AttrKeys  []string
 	InnerText string
 	Childs    map[string][]XMLElement
 	Err       error
@@ -35,6 +36,10 @@ func (n *XMLElement) SelectElement(exp string) (*XMLElement, error) {
 }
 
 func (n *XMLElement) FirstChild() *XMLElement {
+	if n.childs == nil {
+		return nil
+	}
+
 	if len(n.childs) > 0 {
 		return n.childs[0]
 	}
@@ -94,9 +99,8 @@ func (n *XMLElement) String() string {
 	}
 
 	attributes := n.Name + " "
-
-	for _, attr := range n.attrs {
-		attributes += fmt.Sprintf("%s=\"%s\" ", attr.name, attr.value)
+	for _, key := range n.AttrKeys {
+		attributes += fmt.Sprintf("%s=\"%s\" ", key, n.Attrs[key])
 	}
 
 	attributes = strings.Trim(attributes, " ")
@@ -106,4 +110,33 @@ func (n *XMLElement) String() string {
 		n.InnerText,
 		xmlChilds,
 		n.Name)
+}
+
+func (n *XMLElement) AddAttribute(name string, value string) {
+	if n.Attrs == nil {
+		n.Attrs = make(map[string]string)
+	}
+	// if name don't exsite in Attrs yet
+	if _, ok := n.Attrs[name]; !ok {
+		// Add un key in slice to keep the order of attributes
+		n.AttrKeys = append(n.AttrKeys, name)
+	}
+	// change the value of attribute
+	n.Attrs[name] = value
+}
+
+func NewXMLElement() *XMLElement {
+	return &XMLElement{
+		Name:      "",
+		Attrs:     map[string]string{},
+		AttrKeys:  make([]string, 0),
+		InnerText: "",
+		Childs:    map[string][]XMLElement{},
+		Err:       nil,
+		childs:    []*XMLElement{},
+		parent:    nil,
+		attrs:     []*xmlAttr{},
+		localName: "",
+		prefix:    "",
+	}
 }

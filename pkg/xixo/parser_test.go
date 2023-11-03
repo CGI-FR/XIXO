@@ -120,3 +120,76 @@ func TestModifyElementWrappedWithTextWithCallback(t *testing.T) {
 		t.Errorf("Le résultat XML ne correspond pas à l'attendu.\nAttendu:\n%s\nObtenu:\n%s", expectedResultXML, resultXML)
 	}
 }
+
+func TestAttributsShouldSavedAfterParser(t *testing.T) {
+	t.Parallel()
+	// Fichier XML en entrée
+	inputXML := `
+	<root name="start">
+		<name age="12" gender="male">Hello</name>
+	</root>`
+
+	// Lisez les résultats du canal et construisez le XML résultant
+	var resultXMLBuffer bytes.Buffer
+
+	// Créez un bufio.Reader à partir du XML en entrée
+	reader := bytes.NewBufferString(inputXML)
+
+	// Créez une nouvelle instance du parser XML avec la fonction de rappel et xPath
+	parser := xixo.NewXMLParser(reader, &resultXMLBuffer).EnableXpath()
+	parser.RegisterCallback("name", modifyElement1Content)
+	// Créez un canal pour collecter les résultats du parser
+	err := parser.Stream()
+	assert.Nil(t, err)
+
+	// Résultat XML attendu avec le contenu modifié et attributes restés
+	expectedResultXML := `
+	<root name="start">
+		<name age="12" gender="male">ContenuModifie</name>
+	</root>`
+
+	// Vérifiez si le résultat XML correspond à l'attendu
+	resultXML := resultXMLBuffer.String()
+
+	if resultXML != expectedResultXML {
+		t.Errorf("Le résultat XML ne correspond pas à l'attendu.\nAttendu:\n%s\nObtenu:\n%s", expectedResultXML, resultXML)
+	}
+}
+
+func TestModifyAttributsWithMapCallback(t *testing.T) {
+	t.Parallel()
+	// Fichier XML en entrée
+	inputXML := `
+	<root>
+		<element1 age="22" sex="male">Hello world!</element1>
+		<element2>Contenu2 !</element2>
+	</root>`
+
+	// Lisez les résultats du canal et construisez le XML résultant
+	var resultXMLBuffer bytes.Buffer
+
+	// Créez un bufio.Reader à partir du XML en entrée
+	reader := bytes.NewBufferString(inputXML)
+
+	// Créez une nouvelle instance du parser XML avec la fonction de rappel
+	parser := xixo.NewXMLParser(reader, &resultXMLBuffer).EnableXpath()
+	parser.RegisterMapCallback("root", mapCallbackAttributsWithParent)
+
+	// Créez un canal pour collecter les résultats du parser
+	err := parser.Stream()
+	assert.Nil(t, err)
+
+	// Résultat XML attendu avec le contenu modifié
+	expectedResultXML := `
+	<root type="bar">
+  <element1 age="50" sex="male">newChildContent</element1>
+  <element2 age="25">Contenu2 !</element2>
+</root>`
+
+	// Vérifiez si le résultat XML correspond à l'attendu
+	resultXML := resultXMLBuffer.String()
+
+	if resultXML != expectedResultXML {
+		t.Errorf("Le résultat XML ne correspond pas à l'attendu.\nAttendu:\n%s\nObtenu:\n%s", expectedResultXML, resultXML)
+	}
+}

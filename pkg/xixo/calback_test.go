@@ -8,8 +8,10 @@ import (
 	"github.com/youen/xixo/pkg/xixo"
 )
 
+const newChildContent = "newChildContent"
+
 func mapCallback(dict map[string]string) (map[string]string, error) {
-	dict["element1"] = "newChildContent"
+	dict["element1"] = newChildContent
 
 	return dict, nil
 }
@@ -41,7 +43,7 @@ func jsonCallback(source string) (string, error) {
 		return "", err
 	}
 
-	dict["element1"] = "newChildContent"
+	dict["element1"] = newChildContent
 
 	result, err := json.Marshal(dict)
 
@@ -76,4 +78,56 @@ func TestBadJsonCallback(t *testing.T) {
 	_, err := xixo.XMLElementToJSONCallback(badJSONCallback)(element1)
 
 	assert.NotNil(t, err)
+}
+
+func TestMapCallbackWithAttributs(t *testing.T) {
+	t.Parallel()
+
+	element1 := createTreeWithAttribut()
+	//nolint
+	assert.Equal(t, "<root>\n  <element1 age=\"22\">Hello world !</element1>\n  <element2>Contenu2 </element2>\n</root>", element1.String())
+
+	editedElement1, err := xixo.XMLElementToMapCallback(mapCallbackAttributs)(element1)
+	assert.Nil(t, err)
+
+	text := editedElement1.FirstChild().InnerText
+
+	assert.Equal(t, "newChildContent", text)
+
+	//nolint
+	assert.Equal(t, "<root>\n  <element1 age=\"50\">newChildContent</element1>\n  <element2>Contenu2 </element2>\n</root>", editedElement1.String())
+}
+
+func mapCallbackAttributs(dict map[string]string) (map[string]string, error) {
+	dict["element1@age"] = "50"
+	dict["element1"] = newChildContent
+
+	return dict, nil
+}
+
+func TestMapCallbackWithAttributsParentAndChilds(t *testing.T) {
+	t.Parallel()
+
+	element1 := createTreeWithAttributParent()
+	//nolint
+	assert.Equal(t, "<root type=\"foo\">\n  <element1 age=\"22\" sex=\"male\">Hello world !</element1>\n  <element2>Contenu2 </element2>\n</root>", element1.String())
+
+	editedElement1, err := xixo.XMLElementToMapCallback(mapCallbackAttributsWithParent)(element1)
+	assert.Nil(t, err)
+
+	text := editedElement1.FirstChild().InnerText
+
+	assert.Equal(t, "newChildContent", text)
+
+	//nolint
+	assert.Equal(t, "<root type=\"bar\">\n  <element1 age=\"50\" sex=\"male\">newChildContent</element1>\n  <element2 age=\"25\">Contenu2 </element2>\n</root>", editedElement1.String())
+}
+
+func mapCallbackAttributsWithParent(dict map[string]string) (map[string]string, error) {
+	dict["@type"] = "bar"
+	dict["element1@age"] = "50"
+	dict["element1"] = newChildContent
+	dict["element2@age"] = "25"
+
+	return dict, nil
 }
