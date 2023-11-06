@@ -21,9 +21,8 @@ type Attribute struct {
 func XMLElementToMapCallback(callback CallbackMap) Callback {
 	result := func(xmlElement *XMLElement) (*XMLElement, error) {
 		dict := map[string]string{}
-		for name, child := range xmlElement.Childs {
-			dict[name] = child[0].InnerText
-		}
+		// extract all existe attributes in the map
+		extractExistedAttributes(xmlElement, dict)
 
 		dict, err := callback(dict)
 		if err != nil {
@@ -58,6 +57,19 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 	}
 
 	return result
+}
+
+func extractExistedAttributes(xmlElement *XMLElement, dict map[string]string) {
+	for name, child := range xmlElement.Childs {
+		dict[name] = child[0].InnerText
+		for attr, value := range child[0].Attrs {
+			dict[name+"@"+attr] = value
+		}
+	}
+
+	for attr, value := range xmlElement.Attrs {
+		dict["@"+attr] = value
+	}
 }
 
 // extractChildAttributes extracts child attributes from the dictionary.
