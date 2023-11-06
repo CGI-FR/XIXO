@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/CGI-FR/xixo/pkg/xixo"
 	"github.com/stretchr/testify/assert"
-	"github.com/youen/xixo/pkg/xixo"
 )
 
 // TestFuncDriverEdit tests the FuncDriver by creating a reader, writer, and a callback function,

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/CGI-FR/xixo/pkg/xixo"
 	"github.com/stretchr/testify/assert"
-	"github.com/youen/xixo/pkg/xixo"
 )
 
 const newChildContent = "newChildContent"

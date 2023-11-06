@@ -57,7 +57,7 @@ This detailed process demonstrates how **xixo** processes XML files in a streami
 
 ## License
 
-**xixo** is licensed under the MIT License. See the [LICENSE](https://github.com/youen/xixo/blob/main/LICENSE) file for details.
+**xixo** is licensed under the MIT License. See the [LICENSE](https://github.com/CGI-FR/xixo/blob/main/LICENSE) file for details.
 
 ## Acknowledgments
 

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/CGI-FR/xixo/pkg/xixo"
 	"github.com/stretchr/testify/assert"
-	"github.com/youen/xixo/pkg/xixo"
 )
 
 // TestCopyXMLWithoutCallback vérifie que le parser copie simplement le fichier XML sans callback.
