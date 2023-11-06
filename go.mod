@@ -1,4 +1,4 @@
-module github.com/youen/xixo
+module github.com/CGI-FR/xixo
 
 go 1.21
 
