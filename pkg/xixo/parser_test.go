@@ -193,3 +193,35 @@ func TestModifyAttributsWithMapCallback(t *testing.T) {
 		t.Errorf("Le résultat XML ne correspond pas à l'attendu.\nAttendu:\n%s\nObtenu:\n%s", expectedResultXML, resultXML)
 	}
 }
+
+func TestAttributsWithMapCallbackIsInDictionary(t *testing.T) {
+	t.Parallel()
+	// Fichier XML en entrée
+	inputXML := `
+	<root type="foo">
+		<element1 age="22" sex="male">Hello world!</element1>
+		<element2>Contenu2 !</element2>
+	</root>`
+
+	// Lisez les résultats du canal et construisez le XML résultant
+	var resultXMLBuffer bytes.Buffer
+
+	// Créez un bufio.Reader à partir du XML en entrée
+	reader := bytes.NewBufferString(inputXML)
+
+	// Créez une nouvelle instance du parser XML avec la fonction de rappel
+	parser := xixo.NewXMLParser(reader, &resultXMLBuffer).EnableXpath()
+	parser.RegisterMapCallback("root", func(m map[string]string) (map[string]string, error) {
+		assert.Equal(t, m["@type"], "foo")
+		assert.Equal(t, m["element1@age"], "22")
+		assert.Equal(t, m["element1@sex"], "male")
+		assert.Equal(t, m["element1"], "Hello world!")
+		assert.Equal(t, m["element2"], "Contenu2 !")
+
+		return m, nil
+	})
+
+	// Créez un canal pour collecter les résultats du parser
+	err := parser.Stream()
+	assert.Nil(t, err)
+}

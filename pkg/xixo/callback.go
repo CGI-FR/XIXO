@@ -25,6 +25,8 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 			dict[name] = child[0].InnerText
 		}
 
+		extractExistedAttributes(xmlElement, dict)
+
 		dict, err := callback(dict)
 		if err != nil {
 			return nil, err
@@ -58,6 +60,19 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 	}
 
 	return result
+}
+
+func extractExistedAttributes(xmlElement *XMLElement, dict map[string]string) {
+	for name, child := range xmlElement.Childs {
+		dict[name] = child[0].InnerText
+		for attr, value := range child[0].Attrs {
+			dict[name+"@"+attr] = value
+		}
+	}
+
+	for attr, value := range xmlElement.Attrs {
+		dict["@"+attr] = value
+	}
 }
 
 // extractChildAttributes extracts child attributes from the dictionary.
