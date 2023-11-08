@@ -64,7 +64,6 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 
 func extractExistedAttributes(xmlElement *XMLElement, dict map[string]string) {
 	for name, child := range xmlElement.Childs {
-		dict[name] = child[0].InnerText
 		for attr, value := range child[0].Attrs {
 			dict[name+"@"+attr] = value
 		}
