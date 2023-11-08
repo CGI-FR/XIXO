@@ -37,6 +37,32 @@ func TestFuncDriverEdit(t *testing.T) {
 	assert.Equal(t, expected, writer.String())
 }
 
+func TestFuncDriverEditEmptyElement(t *testing.T) {
+	t.Parallel()
+
+	// Create a reader with an XML string, an empty writer, a callback function, and a driver.
+	reader := bytes.NewBufferString("<root><element1 nil=\"true\"/></root>")
+	writer := bytes.Buffer{}
+	called := false
+	callback := func(input map[string]string) (map[string]string, error) {
+		called = true
+
+		return map[string]string{}, nil
+	}
+
+	subscribers := map[string]xixo.CallbackMap{"root": callback}
+	driver := xixo.NewDriver(reader, &writer, subscribers)
+
+	// Stream the XML using the driver, assert the expected output, and check if the callback was called.
+	err := driver.Stream()
+	assert.Nil(t, err)
+
+	assert.True(t, called)
+
+	expected := "<root>\n  <element1 nil=\"true\"></element1>\n</root>"
+	assert.Equal(t, expected, writer.String())
+}
+
 func TestFuncDriverEdit2subscribers(t *testing.T) {
 	t.Parallel()
 
@@ -48,7 +74,7 @@ func TestFuncDriverEdit2subscribers(t *testing.T) {
 </root>`,
 	)
 	writer := bytes.Buffer{}
-	called1 := false
+	called1, called2 := false, false
 
 	subscribers := map[string]xixo.CallbackMap{
 		"root1": func(input map[string]string) (map[string]string, error) {
@@ -58,7 +84,7 @@ func TestFuncDriverEdit2subscribers(t *testing.T) {
 			return input, nil
 		},
 		"root2": func(input map[string]string) (map[string]string, error) {
-			called1 = true
+			called2 = true
 			input["element2"] = "innerTextb2"
 
 			return input, nil
@@ -72,6 +98,7 @@ func TestFuncDriverEdit2subscribers(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.True(t, called1)
+	assert.True(t, called2)
 
 	expected := `<root>
 	<root1>
