@@ -165,6 +165,11 @@ func (x *XMLParser) parse() error {
 
 			if _, found := x.loopElements[element.Name]; found {
 				if tagClosed {
+					err = x.commitDefferWrite()
+					if err != nil {
+						return err
+					}
+
 					continue
 				}
 

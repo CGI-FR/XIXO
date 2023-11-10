@@ -225,3 +225,47 @@ func TestAttributsWithMapCallbackIsInDictionary(t *testing.T) {
 	err := parser.Stream()
 	assert.Nil(t, err)
 }
+
+func TestStreamWithoutModifications(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		input   string
+		element string
+	}{
+		{input: "<a/>", element: "a"},
+		{input: "<a></a>", element: "a"},
+		{input: "<a><b/></a>", element: "b"},
+		// {input: "<a><b><c/></b></a>", element: "b"},
+		{input: "<a><b xmlns=\"htpp://example.com/\" /></a>", element: "b"},
+	}
+
+	for _, testCase := range tests {
+		// Fichier XML en entrée
+		inputXML := testCase.input
+
+		// Lisez les résultats du canal et construisez le XML résultant
+		var resultXMLBuffer bytes.Buffer
+
+		// Créez un bufio.Reader à partir du XML en entrée
+		reader := bytes.NewBufferString(inputXML)
+
+		// Créez une nouvelle instance du parser XML avec la fonction de rappel
+		parser := xixo.NewXMLParser(reader, &resultXMLBuffer).EnableXpath()
+		parser.RegisterMapCallback(testCase.element, func(m map[string]string) (map[string]string, error) {
+			return m, nil
+		})
+
+		// Créez un canal pour collecter les résultats du parser
+		err := parser.Stream()
+		assert.Nil(t, err)
+
+		// Résultat XML attendu avec le contenu modifié
+		expectedResultXML := inputXML
+
+		// Vérifiez si le résultat XML correspond à l'attendu
+		resultXML := resultXMLBuffer.String()
+
+		assert.Equal(t, expectedResultXML, resultXML)
+	}
+}
