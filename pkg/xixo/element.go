@@ -5,6 +5,15 @@ import (
 	"strings"
 )
 
+type CommentElement struct {
+	OuterTextBefore string
+	Comment         string
+}
+
+func (c CommentElement) String() string {
+	return fmt.Sprintf("%s<!--%s-->", c.OuterTextBefore, c.Comment)
+}
+
 type XMLElement struct {
 	Name      string
 	Attrs     map[string]string
@@ -12,12 +21,16 @@ type XMLElement struct {
 	InnerText string
 	Childs    map[string][]XMLElement
 	Err       error
+
 	// filled when xpath enabled
 	childs    []*XMLElement
 	parent    *XMLElement
 	attrs     []*xmlAttr
 	localName string
 	prefix    string
+
+	outerTextBefore string
+	comments        []CommentElement
 }
 
 type xmlAttr struct {
@@ -91,11 +104,7 @@ func (n *XMLElement) String() string {
 	xmlChilds := ""
 
 	for node := n.FirstChild(); node != nil; node = node.NextSibling() {
-		xmlChilds += "  " + node.String() + "\n"
-	}
-
-	if len(xmlChilds) > 0 {
-		xmlChilds = "\n" + xmlChilds
+		xmlChilds += node.String()
 	}
 
 	attributes := n.Name + " "
@@ -105,10 +114,17 @@ func (n *XMLElement) String() string {
 
 	attributes = strings.Trim(attributes, " ")
 
-	return fmt.Sprintf("<%s>%s%s</%s>",
+	commentsString := ""
+	for _, comment := range n.comments {
+		commentsString += comment.String()
+	}
+
+	return fmt.Sprintf("%s<%s>%s%s%s</%s>",
+		n.outerTextBefore,
 		attributes,
-		n.InnerText,
+		commentsString,
 		xmlChilds,
+		n.InnerText,
 		n.Name)
 }
 
@@ -123,6 +139,10 @@ func (n *XMLElement) AddAttribute(name string, value string) {
 	}
 	// change the value of attribute
 	n.Attrs[name] = value
+}
+
+func (n *XMLElement) AddComment(comment CommentElement) {
+	n.comments = append(n.comments, comment)
 }
 
 func NewXMLElement() *XMLElement {

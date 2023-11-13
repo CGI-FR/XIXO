@@ -9,63 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const parentTag = "root"
+const (
+	parentTag = "root"
+)
 
-func createTree() *xixo.XMLElement {
-	rootXML := `
-	<root>
-		<element1>Hello world !</element1>
-		<element2>Contenu2 </element2>
-	</root>`
-
-	var root *xixo.XMLElement
-
-	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
-	parser.RegisterCallback("root", func(x *xixo.XMLElement) (*xixo.XMLElement, error) {
-		root = x
-
-		return x, nil
-	})
-
-	err := parser.Stream()
-	if err != nil {
-		return nil
-	}
-
-	return root
-}
-
-func createTreeWithAttribut() *xixo.XMLElement {
-	rootXML := `
-	<root>
-		<element1 age="22">Hello world !</element1>
-		<element2>Contenu2 </element2>
-	</root>`
-
-	var root *xixo.XMLElement
-
-	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
-	parser.RegisterCallback("root", func(x *xixo.XMLElement) (*xixo.XMLElement, error) {
-		root = x
-
-		return x, nil
-	})
-
-	err := parser.Stream()
-	if err != nil {
-		return nil
-	}
-
-	return root
-}
-
-func createTreeWithAttributParent() *xixo.XMLElement {
-	rootXML := `
-	<root type="foo">
-		<element1 age="22" sex="male">Hello world !</element1>
-		<element2>Contenu2 </element2>
-	</root>`
-
+func createTreeFromXMLString(rootXML string) *xixo.XMLElement {
 	var root *xixo.XMLElement
 
 	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
@@ -86,8 +34,7 @@ func createTreeWithAttributParent() *xixo.XMLElement {
 func TestElementStringShouldReturnXML(t *testing.T) {
 	t.Parallel()
 
-	rootXML := `
-	<root>
+	rootXML := `<root>
 		<element1>Hello world !</element1>
 		<element2>Contenu2 </element2>
 	</root>`
@@ -105,9 +52,9 @@ func TestElementStringShouldReturnXML(t *testing.T) {
 	assert.Nil(t, err)
 
 	expected := `<root>
-  <element1>Hello world !</element1>
-  <element2>Contenu2 </element2>
-</root>`
+		<element1>Hello world !</element1>
+		<element2>Contenu2 </element2>
+	</root>`
 
 	assert.Equal(t, expected, root.String())
 }
@@ -118,9 +65,9 @@ func TestElementStringShouldReturnXMLWithSameOrder(t *testing.T) {
 	rootXML := `<root>
   <element1>Hello world !</element1>
   <element2>Contenu2 </element2>
-  <element3>Contenu2 </element3>
-  <element4>Contenu2 </element4>
-  <element5>Contenu2 </element5>
+  <element3>Contenu3 </element3>
+  <element4>Contenu4 </element4>
+  <element5>Contenu5 </element5>
 </root>`
 
 	var root *xixo.XMLElement
@@ -128,6 +75,34 @@ func TestElementStringShouldReturnXMLWithSameOrder(t *testing.T) {
 	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
 	parser.RegisterCallback("root", func(x *xixo.XMLElement) (*xixo.XMLElement, error) {
 		root = x
+		assert.Equal(t, root.InnerText, "\n")
+
+		return x, nil
+	})
+
+	err := parser.Stream()
+	assert.Nil(t, err)
+
+	assert.Equal(t, rootXML, root.String())
+}
+
+func TestElementStringShouldPreserverContentOrder(t *testing.T) {
+	t.Parallel()
+
+	rootXML := `<root>
+  <element1>Hello world !</element1>
+  <element2>Contenu2 </element2>
+  <element2>Contenu3 </element2>
+  <element2>Contenu4 </element2>
+  <element2>Contenu5 </element2>
+</root>`
+
+	var root *xixo.XMLElement
+
+	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), io.Discard).EnableXpath()
+	parser.RegisterCallback("root", func(x *xixo.XMLElement) (*xixo.XMLElement, error) {
+		root = x
+		assert.Equal(t, root.InnerText, "\n")
 
 		return x, nil
 	})

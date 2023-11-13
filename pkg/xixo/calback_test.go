@@ -8,7 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const newChildContent = "newChildContent"
+const (
+	newChildContent = "newChildContent"
+	rootXML         = `<root>
+	<element1>Hello world !</element1>
+	<element2>Contenu2 </element2>
+</root>`
+)
 
 func mapCallback(dict map[string]string) (map[string]string, error) {
 	dict["element1"] = newChildContent
@@ -20,19 +26,23 @@ func mapCallback(dict map[string]string) (map[string]string, error) {
 func TestMapCallback(t *testing.T) {
 	t.Parallel()
 
-	element1 := createTree()
-	//nolint
-	assert.Equal(t, "<root>\n  <element1>Hello world !</element1>\n  <element2>Contenu2 </element2>\n</root>", element1.String())
+	element1 := createTreeFromXMLString(rootXML)
+
+	assert.Equal(t, rootXML, element1.String())
 
 	editedElement1, err := xixo.XMLElementToMapCallback(mapCallback)(element1)
 	assert.Nil(t, err)
 
 	text := editedElement1.FirstChild().InnerText
 
-	assert.Equal(t, "newChildContent", text)
+	assert.Equal(t, newChildContent, text)
 
-	//nolint
-	assert.Equal(t, "<root>\n  <element1>newChildContent</element1>\n  <element2>Contenu2 </element2>\n</root>", editedElement1.String())
+	expected := `<root>
+	<element1>newChildContent</element1>
+	<element2>Contenu2 </element2>
+</root>`
+
+	assert.Equal(t, expected, editedElement1.String())
 }
 
 func jsonCallback(source string) (string, error) {
@@ -54,7 +64,7 @@ func jsonCallback(source string) (string, error) {
 func TestJsonCallback(t *testing.T) {
 	t.Parallel()
 
-	root := createTree()
+	root := createTreeFromXMLString(rootXML)
 
 	editedRoot, err := xixo.XMLElementToJSONCallback(jsonCallback)(root)
 	assert.Nil(t, err)
@@ -73,7 +83,7 @@ func badJSONCallback(source string) (string, error) {
 func TestBadJsonCallback(t *testing.T) {
 	t.Parallel()
 
-	element1 := createTree()
+	element1 := createTreeFromXMLString(rootXML)
 
 	_, err := xixo.XMLElementToJSONCallback(badJSONCallback)(element1)
 
@@ -83,9 +93,14 @@ func TestBadJsonCallback(t *testing.T) {
 func TestMapCallbackWithAttributs(t *testing.T) {
 	t.Parallel()
 
-	element1 := createTreeWithAttribut()
-	//nolint
-	assert.Equal(t, "<root>\n  <element1 age=\"22\">Hello world !</element1>\n  <element2>Contenu2 </element2>\n</root>", element1.String())
+	rootXML := `<root>
+		<element1 age="22">Hello world !</element1>
+		<element2>Contenu2 </element2>
+	</root>`
+
+	element1 := createTreeFromXMLString(rootXML)
+
+	assert.Equal(t, rootXML, element1.String())
 
 	editedElement1, err := xixo.XMLElementToMapCallback(mapCallbackAttributs)(element1)
 	assert.Nil(t, err)
@@ -94,8 +109,12 @@ func TestMapCallbackWithAttributs(t *testing.T) {
 
 	assert.Equal(t, "newChildContent", text)
 
-	//nolint
-	assert.Equal(t, "<root>\n  <element1 age=\"50\">newChildContent</element1>\n  <element2>Contenu2 </element2>\n</root>", editedElement1.String())
+	expected := `<root>
+		<element1 age="50">newChildContent</element1>
+		<element2>Contenu2 </element2>
+	</root>`
+
+	assert.Equal(t, expected, editedElement1.String())
 }
 
 func mapCallbackAttributs(dict map[string]string) (map[string]string, error) {
@@ -108,9 +127,14 @@ func mapCallbackAttributs(dict map[string]string) (map[string]string, error) {
 func TestMapCallbackWithAttributsParentAndChilds(t *testing.T) {
 	t.Parallel()
 
-	element1 := createTreeWithAttributParent()
-	//nolint
-	assert.Equal(t, "<root type=\"foo\">\n  <element1 age=\"22\" sex=\"male\">Hello world !</element1>\n  <element2>Contenu2 </element2>\n</root>", element1.String())
+	rootXML := `<root type="foo">
+		<element1 age="22" sex="male">Hello world !</element1>
+		<element2>Contenu2 </element2>
+	</root>`
+
+	element1 := createTreeFromXMLString(rootXML)
+
+	assert.Equal(t, rootXML, element1.String())
 
 	editedElement1, err := xixo.XMLElementToMapCallback(mapCallbackAttributsWithParent)(element1)
 	assert.Nil(t, err)
@@ -119,8 +143,12 @@ func TestMapCallbackWithAttributsParentAndChilds(t *testing.T) {
 
 	assert.Equal(t, "newChildContent", text)
 
-	//nolint
-	assert.Equal(t, "<root type=\"bar\">\n  <element1 age=\"50\" sex=\"male\">newChildContent</element1>\n  <element2 age=\"25\">Contenu2 </element2>\n</root>", editedElement1.String())
+	expected := `<root type="bar">
+		<element1 age="50" sex="male">newChildContent</element1>
+		<element2 age="25">Contenu2 </element2>
+	</root>`
+
+	assert.Equal(t, expected, editedElement1.String())
 }
 
 func mapCallbackAttributsWithParent(dict map[string]string) (map[string]string, error) {

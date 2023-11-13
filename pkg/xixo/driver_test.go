@@ -33,7 +33,7 @@ func TestFuncDriverEdit(t *testing.T) {
 
 	assert.True(t, called)
 
-	expected := "<root>\n  <element1>innerTextb</element1>\n</root>"
+	expected := "<root><element1>innerTextb</element1></root>"
 	assert.Equal(t, expected, writer.String())
 }
 
@@ -59,7 +59,7 @@ func TestFuncDriverEditEmptyElement(t *testing.T) {
 
 	assert.True(t, called)
 
-	expected := "<root>\n  <element1 nil=\"true\"></element1>\n</root>"
+	expected := "<root><element1 nil=\"true\"></element1></root>"
 	assert.Equal(t, expected, writer.String())
 }
 
@@ -69,9 +69,9 @@ func TestFuncDriverEdit2subscribers(t *testing.T) {
 	// Create a reader with an XML string, an empty writer, a callback function, and a driver.
 	reader := bytes.NewBufferString(
 		`<root>
-	<root1><element1>innerTexta1</element1></root1>
-	<root2><element2>innerTexta2</element2></root2>
-</root>`,
+			<root1><element1>innerTexta1</element1></root1>
+			<root2><element2>innerTexta2</element2></root2>
+		</root>`,
 	)
 	writer := bytes.Buffer{}
 	called1, called2 := false, false
@@ -79,12 +79,14 @@ func TestFuncDriverEdit2subscribers(t *testing.T) {
 	subscribers := map[string]xixo.CallbackMap{
 		"root1": func(input map[string]string) (map[string]string, error) {
 			called1 = true
+			assert.Equal(t, input["element1"], "innerTexta1")
 			input["element1"] = "innerTextb1"
 
 			return input, nil
 		},
 		"root2": func(input map[string]string) (map[string]string, error) {
 			called2 = true
+			assert.Equal(t, "innerTexta2", input["element2"])
 			input["element2"] = "innerTextb2"
 
 			return input, nil
@@ -101,12 +103,8 @@ func TestFuncDriverEdit2subscribers(t *testing.T) {
 	assert.True(t, called2)
 
 	expected := `<root>
-	<root1>
-  <element1>innerTextb1</element1>
-</root1>
-	<root2>
-  <element2>innerTextb2</element2>
-</root2>
-</root>`
+			<root1><element1>innerTextb1</element1></root1>
+			<root2><element2>innerTextb2</element2></root2>
+		</root>`
 	assert.Equal(t, expected, writer.String())
 }

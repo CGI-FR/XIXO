@@ -22,6 +22,7 @@ type XMLParser struct {
 	scratch           *scratch
 	scratch2          *scratch
 	scratchWriter     *scratch
+	scratchOuterText  *scratch
 	deffer            bool
 	TotalReadSize     uint64
 	nextWrite         *byte
@@ -37,6 +38,7 @@ func NewXMLParser(reader io.Reader, writer io.Writer) *XMLParser {
 		scratch:          &scratch{data: make([]byte, 1024)},
 		scratch2:         &scratch{data: make([]byte, 1024)},
 		scratchWriter:    &scratch{data: make([]byte, 1024)},
+		scratchOuterText: &scratch{data: make([]byte, 1024)},
 	}
 }
 
@@ -145,7 +147,7 @@ func (x *XMLParser) parse() error {
 				continue
 			}
 
-			iscomment, err = x.isComment()
+			iscomment, _, err = x.readComment()
 
 			if err != nil {
 				return err
@@ -169,6 +171,9 @@ func (x *XMLParser) parse() error {
 					if err != nil {
 						return err
 					}
+
+					x.scratch2.reset()
+					x.scratchOuterText.reset()
 
 					continue
 				}
@@ -226,8 +231,11 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 		element   *XMLElement
 		tagClosed bool
 		iscomment bool
+		comment   CommentElement
 	)
 
+	result.outerTextBefore = string(x.scratchOuterText.bytes())
+	x.scratchOuterText.reset()
 	x.scratch2.reset() // this hold the inner text
 
 	for {
@@ -255,7 +263,7 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 				continue
 			}
 
-			iscomment, err = x.isComment()
+			iscomment, comment, err = x.readComment()
 
 			if err != nil {
 				result.Err = err
@@ -264,6 +272,8 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 			}
 
 			if iscomment {
+				result.AddComment(comment)
+
 				continue
 			}
 
@@ -284,9 +294,8 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 				}
 
 				if tag == result.Name {
-					if len(result.Childs) == 0 {
-						result.InnerText = string(x.scratch2.bytes())
-					}
+					result.InnerText = string(x.scratch2.bytes())
+					x.scratch2.reset()
 
 					return result
 				}
@@ -344,6 +353,7 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 			}
 		} else {
 			x.scratch2.add(cur)
+			x.scratchOuterText.add(cur)
 		}
 	}
 }
@@ -489,9 +499,7 @@ search_close_tag:
 				return nil, false, x.defaultError()
 			}
 			result.AddAttribute(attr, attrVal)
-			// if x.xpathEnabled {
-			// 	result.attrs = append(result.attrs, &xmlAttr{name: attr, value: attrVal})
-			// }
+
 			x.scratch.reset()
 
 			continue
@@ -510,25 +518,26 @@ search_close_tag:
 	}
 }
 
-func (x *XMLParser) isComment() (bool, error) {
+func (x *XMLParser) readComment() (bool, CommentElement, error) {
 	var (
-		c   byte
-		err error
+		c      byte
+		err    error
+		result CommentElement
 	)
 
 	c, err = x.readByte()
 
 	if err != nil {
-		return false, err
+		return false, result, err
 	}
 
 	if c != '!' {
 		err := x.unreadByte()
 		if err != nil {
-			return false, err
+			return false, result, err
 		}
 
-		return false, nil
+		return false, result, nil
 	}
 
 	var d, e byte
@@ -536,19 +545,19 @@ func (x *XMLParser) isComment() (bool, error) {
 	d, err = x.readByte()
 
 	if err != nil {
-		return false, err
+		return false, result, err
 	}
 
 	e, err = x.readByte()
 
 	if err != nil {
-		return false, err
+		return false, result, err
 	}
 
 	if d != '-' || e != '-' {
 		err = x.defaultError()
 
-		return false, err
+		return false, result, err
 	}
 
 	// skip part
@@ -558,14 +567,23 @@ func (x *XMLParser) isComment() (bool, error) {
 		c, err = x.readByte()
 
 		if err != nil {
-			return false, err
+			return false, result, err
 		}
 
 		if c == '>' &&
 			len(x.scratch.bytes()) > 1 &&
 			x.scratch.bytes()[len(x.scratch.bytes())-1] == '-' &&
 			x.scratch.bytes()[len(x.scratch.bytes())-2] == '-' {
-			return true, nil
+			result = CommentElement{
+				string(x.scratchOuterText.bytes()),
+				string(x.scratch.bytes())[:len(x.scratch.bytes())-2],
+			}
+
+			x.scratchOuterText.reset()
+			x.scratch2.reset()
+			x.scratch.reset()
+
+			return true, result, nil
 		}
 
 		x.scratch.add(c)
@@ -817,6 +835,7 @@ skipDecleration:
 
 func (x *XMLParser) closeTagName() (string, error) {
 	x.scratch.reset()
+	x.scratchOuterText.reset()
 
 	var (
 		c   byte

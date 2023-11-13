@@ -159,8 +159,7 @@ func TestAttributsShouldSavedAfterParser(t *testing.T) {
 func TestModifyAttributsWithMapCallback(t *testing.T) {
 	t.Parallel()
 	// Fichier XML en entrée
-	inputXML := `
-	<root>
+	inputXML := `<root>
 		<element1 age="22" sex="male">Hello world!</element1>
 		<element2>Contenu2 !</element2>
 	</root>`
@@ -180,18 +179,15 @@ func TestModifyAttributsWithMapCallback(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Résultat XML attendu avec le contenu modifié
-	expectedResultXML := `
-	<root type="bar">
-  <element1 age="50" sex="male">newChildContent</element1>
-  <element2 age="25">Contenu2 !</element2>
-</root>`
+	expectedResultXML := `<root type="bar">
+		<element1 age="50" sex="male">newChildContent</element1>
+		<element2 age="25">Contenu2 !</element2>
+	</root>`
 
 	// Vérifiez si le résultat XML correspond à l'attendu
 	resultXML := resultXMLBuffer.String()
 
-	if resultXML != expectedResultXML {
-		t.Errorf("Le résultat XML ne correspond pas à l'attendu.\nAttendu:\n%s\nObtenu:\n%s", expectedResultXML, resultXML)
-	}
+	assert.Equal(t, expectedResultXML, resultXML)
 }
 
 func TestAttributsWithMapCallbackIsInDictionary(t *testing.T) {
@@ -233,9 +229,35 @@ func TestStreamWithoutModifications(t *testing.T) {
 		input   string
 		element string
 	}{
+		// How to replace an array of sub-elements
+		// {input: "<a>i<b>cb1</b>j<b>cb2</b>k<b>cb3</b>l</a>", element: "a"},
+		// {input: "<a>i<b>cb1</b>j<b>cb2</b>k</a>", element: "a"},
+
+		{input: "<a>i<b>cb1</b>j<c>cb2</c>k</a>", element: "a"},
+
 		{input: "<a/>", element: "a"},
 		{input: "<a></a>", element: "a"},
+		{input: "<a></a>", element: "z"},
+		{input: "<a>innerZ</a>", element: "b"},
+		{input: "<a>innerA</a>", element: "a"},
+		{input: "<a> <!-- commentZ --></a>", element: "b"},
+		{input: "<a> <!-- comment0 --></a>", element: "a"},
+
 		{input: "<a><b/></a>", element: "b"},
+		{input: "<a><b/> <!-- comment --></a>", element: "b"},
+		{input: "<a> <!-- comment1 --> <b></b></a>", element: "a"},
+		{input: "<a> <!-- comment2 --> <b></b></a>", element: "b"},
+		// {input: "<a><b/> <!-- comment --></a>", element: "a"},
+		// {input: "<a>i<b/></a>", element: "a"},
+
+		{input: "<a><b></b><b></b></a>", element: "a"},
+		{input: "<a><b></b><c></c></a>", element: "a"},
+
+		{input: "<a>i<b></b></a>", element: "a"},
+		{input: "<a>i<b></b>j<b></b></a>", element: "a"},
+
+		{input: "<a>i<b></b>j<b></b>k</a>", element: "a"},
+		{input: "<a>i<b></b>j<c></c>k</a>", element: "a"},
 		// {input: "<a><b><c/></b></a>", element: "b"},
 		{input: "<a><b xmlns=\"htpp://example.com/\" /></a>", element: "b"},
 	}
@@ -268,4 +290,38 @@ func TestStreamWithoutModifications(t *testing.T) {
 
 		assert.Equal(t, expectedResultXML, resultXML)
 	}
+}
+
+func TestModifyShouldPreserveIndentForElementInline(t *testing.T) {
+	t.Parallel()
+	// Fichier XML en entrée
+	inputXML := `
+	<root>
+youen<element1 age="22" sex="male">Hello world!</element1>
+		<element2>Contenu2 !</element2>
+	</root>`
+
+	// Lisez les résultats du canal et construisez le XML résultant
+	var resultXMLBuffer bytes.Buffer
+
+	// Créez un bufio.Reader à partir du XML en entrée
+	reader := bytes.NewBufferString(inputXML)
+
+	// Créez une nouvelle instance du parser XML avec la fonction de rappel
+	parser := xixo.NewXMLParser(reader, &resultXMLBuffer).EnableXpath()
+	parser.RegisterMapCallback("root", func(m map[string]string) (map[string]string, error) {
+		return m, nil
+	})
+
+	// Créez un canal pour collecter les résultats du parser
+	err := parser.Stream()
+	assert.Nil(t, err)
+
+	// Résultat XML attendu avec le contenu modifié
+	expectedResultXML := inputXML
+
+	// Vérifiez si le résultat XML correspond à l'attendu
+	resultXML := resultXMLBuffer.String()
+
+	assert.Equal(t, expectedResultXML, resultXML)
 }
