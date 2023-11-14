@@ -244,10 +244,11 @@ func TestStreamWithoutModifications(t *testing.T) {
 		{input: "<a> <!-- comment0 --></a>", element: "a"},
 
 		{input: "<a><b/></a>", element: "b"},
+		{input: "<a><b/></a>", element: "a"},
 		{input: "<a><b/> <!-- comment --></a>", element: "b"},
 		{input: "<a> <!-- comment1 --> <b></b></a>", element: "a"},
 		{input: "<a> <!-- comment2 --> <b></b></a>", element: "b"},
-		// {input: "<a><b/> <!-- comment --></a>", element: "a"},
+		{input: "<a><b/> <!-- comment --></a>", element: "a"},
 		{input: "<a>i<b/></a>", element: "a"},
 
 		{input: "<a><b></b><b></b></a>", element: "a"},
@@ -258,8 +259,9 @@ func TestStreamWithoutModifications(t *testing.T) {
 
 		{input: "<a>i<b></b>j<b></b>k</a>", element: "a"},
 		{input: "<a>i<b></b>j<c></c>k</a>", element: "a"},
-		// {input: "<a><b><c/></b></a>", element: "b"},
-		{input: "<a><b xmlns=\"htpp://example.com/\" /></a>", element: "b"},
+		{input: "<a><b><c/></b></a>", element: "b"},
+		{input: "<a><b xmlns=\"http://example.com/\"/></a>", element: "b"},
+		{input: "<a><b xmlns=\"http://example.com/\"/></a>", element: "a"},
 	}
 
 	for _, testCase := range tests {

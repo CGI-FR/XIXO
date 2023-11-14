@@ -5,15 +5,6 @@ import (
 	"strings"
 )
 
-type CommentElement struct {
-	OuterTextBefore string
-	Comment         string
-}
-
-func (c CommentElement) String() string {
-	return fmt.Sprintf("%s<!--%s-->", c.OuterTextBefore, c.Comment)
-}
-
 type XMLElement struct {
 	Name      string
 	Attrs     map[string]string
@@ -30,7 +21,6 @@ type XMLElement struct {
 	prefix    string
 
 	outerTextBefore string
-	comments        []CommentElement
 	autoClosable    bool
 }
 
@@ -115,21 +105,15 @@ func (n *XMLElement) String() string {
 
 	attributes = strings.Trim(attributes, " ")
 
-	commentsString := ""
-	for _, comment := range n.comments {
-		commentsString += comment.String()
-	}
-
-	if n.autoClosable && n.InnerText == "" && commentsString == "" && xmlChilds == "" {
+	if n.autoClosable && n.InnerText == "" && xmlChilds == "" {
 		return fmt.Sprintf("%s<%s/>",
 			n.outerTextBefore,
 			attributes)
 	}
 
-	return fmt.Sprintf("%s<%s>%s%s%s</%s>",
+	return fmt.Sprintf("%s<%s>%s%s</%s>",
 		n.outerTextBefore,
 		attributes,
-		commentsString,
 		xmlChilds,
 		n.InnerText,
 		n.Name)
@@ -146,10 +130,6 @@ func (n *XMLElement) AddAttribute(name string, value string) {
 	}
 	// change the value of attribute
 	n.Attrs[name] = value
-}
-
-func (n *XMLElement) AddComment(comment CommentElement) {
-	n.comments = append(n.comments, comment)
 }
 
 func NewXMLElement() *XMLElement {

@@ -147,7 +147,7 @@ func (x *XMLParser) parse() error {
 				continue
 			}
 
-			iscomment, _, err = x.readComment()
+			iscomment, err = x.readComment()
 
 			if err != nil {
 				return err
@@ -184,6 +184,8 @@ func (x *XMLParser) parse() error {
 				x.resultChannel <- element
 
 				if callback, ok := x.loopElements[element.Name]; ok {
+					element.outerTextBefore = ""
+
 					mutatedElement, err := callback(element)
 					if err != nil {
 						return err
@@ -231,10 +233,9 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 		element   *XMLElement
 		tagClosed bool
 		iscomment bool
-		comment   CommentElement
 	)
 
-	result.outerTextBefore = string(x.scratchOuterText.bytes())
+	result.outerTextBefore = string(x.scratch2.bytes())
 	x.scratchOuterText.reset()
 	x.scratch2.reset() // this hold the inner text
 
@@ -263,7 +264,7 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 				continue
 			}
 
-			iscomment, comment, err = x.readComment()
+			iscomment, err = x.readComment()
 
 			if err != nil {
 				result.Err = err
@@ -272,8 +273,6 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 			}
 
 			if iscomment {
-				result.AddComment(comment)
-
 				continue
 			}
 
@@ -439,7 +438,7 @@ func (x *XMLParser) startElement() (*XMLElement, bool, error) {
 			if prev == '/' {
 				result.Name = string(x.scratch.bytes()[:len(x.scratch.bytes())-1])
 				result.autoClosable = true
-				result.outerTextBefore = string(x.scratchOuterText.bytes())
+				result.outerTextBefore = string(x.scratch2.bytes())
 				x.scratchOuterText.reset()
 				x.scratch2.reset()
 
@@ -511,6 +510,8 @@ search_close_tag:
 
 		if cur == '>' { // if tag name not found
 			if prev == '/' { // tag special close
+				result.autoClosable = true
+
 				return result, true, nil
 			}
 
@@ -522,26 +523,25 @@ search_close_tag:
 	}
 }
 
-func (x *XMLParser) readComment() (bool, CommentElement, error) {
+func (x *XMLParser) readComment() (bool, error) {
 	var (
-		c      byte
-		err    error
-		result CommentElement
+		c   byte
+		err error
 	)
 
 	c, err = x.readByte()
 
 	if err != nil {
-		return false, result, err
+		return false, err
 	}
 
 	if c != '!' {
 		err := x.unreadByte()
 		if err != nil {
-			return false, result, err
+			return false, err
 		}
 
-		return false, result, nil
+		return false, nil
 	}
 
 	var d, e byte
@@ -549,19 +549,19 @@ func (x *XMLParser) readComment() (bool, CommentElement, error) {
 	d, err = x.readByte()
 
 	if err != nil {
-		return false, result, err
+		return false, err
 	}
 
 	e, err = x.readByte()
 
 	if err != nil {
-		return false, result, err
+		return false, err
 	}
 
 	if d != '-' || e != '-' {
 		err = x.defaultError()
 
-		return false, result, err
+		return false, err
 	}
 
 	// skip part
@@ -571,23 +571,29 @@ func (x *XMLParser) readComment() (bool, CommentElement, error) {
 		c, err = x.readByte()
 
 		if err != nil {
-			return false, result, err
+			return false, err
 		}
 
 		if c == '>' &&
 			len(x.scratch.bytes()) > 1 &&
 			x.scratch.bytes()[len(x.scratch.bytes())-1] == '-' &&
 			x.scratch.bytes()[len(x.scratch.bytes())-2] == '-' {
-			result = CommentElement{
-				string(x.scratchOuterText.bytes()),
-				string(x.scratch.bytes())[:len(x.scratch.bytes())-2],
+			x.scratch2.add('<')
+			x.scratch2.add('!')
+			x.scratch2.add('-')
+			x.scratch2.add('-')
+
+			for _, c := range x.scratch.bytes() {
+				x.scratch2.add(c)
 			}
 
+			x.scratch2.add('>')
+
 			x.scratchOuterText.reset()
-			x.scratch2.reset()
+			// x.scratch2.reset()
 			x.scratch.reset()
 
-			return true, result, nil
+			return true, nil
 		}
 
 		x.scratch.add(c)

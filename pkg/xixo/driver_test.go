@@ -59,7 +59,7 @@ func TestFuncDriverEditEmptyElement(t *testing.T) {
 
 	assert.True(t, called)
 
-	expected := "<root><element1 nil=\"true\"></element1></root>"
+	expected := "<root><element1 nil=\"true\"/></root>"
 	assert.Equal(t, expected, writer.String())
 }
 
