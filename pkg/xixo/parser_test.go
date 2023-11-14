@@ -248,7 +248,7 @@ func TestStreamWithoutModifications(t *testing.T) {
 		{input: "<a> <!-- comment1 --> <b></b></a>", element: "a"},
 		{input: "<a> <!-- comment2 --> <b></b></a>", element: "b"},
 		// {input: "<a><b/> <!-- comment --></a>", element: "a"},
-		// {input: "<a>i<b/></a>", element: "a"},
+		{input: "<a>i<b/></a>", element: "a"},
 
 		{input: "<a><b></b><b></b></a>", element: "a"},
 		{input: "<a><b></b><c></c></a>", element: "a"},

@@ -438,6 +438,10 @@ func (x *XMLParser) startElement() (*XMLElement, bool, error) {
 		if cur == '>' {
 			if prev == '/' {
 				result.Name = string(x.scratch.bytes()[:len(x.scratch.bytes())-1])
+				result.autoClosable = true
+				result.outerTextBefore = string(x.scratchOuterText.bytes())
+				x.scratchOuterText.reset()
+				x.scratch2.reset()
 
 				if x.xpathEnabled {
 					names := strings.Split(result.Name, ":")

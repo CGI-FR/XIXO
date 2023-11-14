@@ -31,6 +31,7 @@ type XMLElement struct {
 
 	outerTextBefore string
 	comments        []CommentElement
+	autoClosable    bool
 }
 
 type xmlAttr struct {
@@ -117,6 +118,12 @@ func (n *XMLElement) String() string {
 	commentsString := ""
 	for _, comment := range n.comments {
 		commentsString += comment.String()
+	}
+
+	if n.autoClosable && n.InnerText == "" && commentsString == "" && xmlChilds == "" {
+		return fmt.Sprintf("%s<%s/>",
+			n.outerTextBefore,
+			attributes)
 	}
 
 	return fmt.Sprintf("%s<%s>%s%s%s</%s>",
