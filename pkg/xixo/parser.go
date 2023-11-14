@@ -20,9 +20,8 @@ type XMLParser struct {
 	skipOuterElements bool
 	xpathEnabled      bool
 	scratch           *scratch
-	scratch2          *scratch
+	scratchInnerText  *scratch
 	scratchWriter     *scratch
-	scratchOuterText  *scratch
 	deffer            bool
 	TotalReadSize     uint64
 	nextWrite         *byte
@@ -36,9 +35,8 @@ func NewXMLParser(reader io.Reader, writer io.Writer) *XMLParser {
 		resultChannel:    make(chan *XMLElement, 256),
 		skipElements:     map[string]bool{},
 		scratch:          &scratch{data: make([]byte, 1024)},
-		scratch2:         &scratch{data: make([]byte, 1024)},
+		scratchInnerText: &scratch{data: make([]byte, 1024)},
 		scratchWriter:    &scratch{data: make([]byte, 1024)},
-		scratchOuterText: &scratch{data: make([]byte, 1024)},
 	}
 }
 
@@ -172,8 +170,7 @@ func (x *XMLParser) parse() error {
 						return err
 					}
 
-					x.scratch2.reset()
-					x.scratchOuterText.reset()
+					x.scratchInnerText.reset()
 
 					continue
 				}
@@ -235,9 +232,8 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 		iscomment bool
 	)
 
-	result.outerTextBefore = string(x.scratch2.bytes())
-	x.scratchOuterText.reset()
-	x.scratch2.reset() // this hold the inner text
+	result.outerTextBefore = string(x.scratchInnerText.bytes())
+	x.scratchInnerText.reset() // this hold the inner text
 
 	for {
 		cur, err = x.readByte()
@@ -258,7 +254,7 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 
 			if iscdata {
 				for _, cd := range cddata {
-					x.scratch2.add(cd)
+					x.scratchInnerText.add(cd)
 				}
 
 				continue
@@ -293,8 +289,8 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 				}
 
 				if tag == result.Name {
-					result.InnerText = string(x.scratch2.bytes())
-					x.scratch2.reset()
+					result.InnerText = string(x.scratchInnerText.bytes())
+					x.scratchInnerText.reset()
 
 					return result
 				}
@@ -351,8 +347,7 @@ func (x *XMLParser) getElementTree(result *XMLElement) *XMLElement {
 				}
 			}
 		} else {
-			x.scratch2.add(cur)
-			x.scratchOuterText.add(cur)
+			x.scratchInnerText.add(cur)
 		}
 	}
 }
@@ -438,9 +433,8 @@ func (x *XMLParser) startElement() (*XMLElement, bool, error) {
 			if prev == '/' {
 				result.Name = string(x.scratch.bytes()[:len(x.scratch.bytes())-1])
 				result.autoClosable = true
-				result.outerTextBefore = string(x.scratch2.bytes())
-				x.scratchOuterText.reset()
-				x.scratch2.reset()
+				result.outerTextBefore = string(x.scratchInnerText.bytes())
+				x.scratchInnerText.reset()
 
 				if x.xpathEnabled {
 					names := strings.Split(result.Name, ":")
@@ -578,18 +572,17 @@ func (x *XMLParser) readComment() (bool, error) {
 			len(x.scratch.bytes()) > 1 &&
 			x.scratch.bytes()[len(x.scratch.bytes())-1] == '-' &&
 			x.scratch.bytes()[len(x.scratch.bytes())-2] == '-' {
-			x.scratch2.add('<')
-			x.scratch2.add('!')
-			x.scratch2.add('-')
-			x.scratch2.add('-')
+			x.scratchInnerText.add('<')
+			x.scratchInnerText.add('!')
+			x.scratchInnerText.add('-')
+			x.scratchInnerText.add('-')
 
 			for _, c := range x.scratch.bytes() {
-				x.scratch2.add(c)
+				x.scratchInnerText.add(c)
 			}
 
-			x.scratch2.add('>')
+			x.scratchInnerText.add('>')
 
-			x.scratchOuterText.reset()
 			// x.scratch2.reset()
 			x.scratch.reset()
 
@@ -845,7 +838,6 @@ skipDecleration:
 
 func (x *XMLParser) closeTagName() (string, error) {
 	x.scratch.reset()
-	x.scratchOuterText.reset()
 
 	var (
 		c   byte
