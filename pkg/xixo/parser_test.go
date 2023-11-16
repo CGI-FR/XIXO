@@ -233,6 +233,19 @@ func TestStreamWithoutModifications(t *testing.T) {
 		// {input: "<a>i<b>cb1</b>j<b>cb2</b>k<b>cb3</b>l</a>", element: "a"},
 		// {input: "<a>i<b>cb1</b>j<b>cb2</b>k</a>", element: "a"},
 
+		{input: "<a><b/>\n</a>", element: "a"},
+		{input: "<a><b/>\n</a>", element: "b"},
+
+		{input: "<a><b/>\n<c/>\n</a>", element: "a"},
+		{input: "<a><b/>\n<c/>\n</a>", element: "b"},
+		{input: "<a><b/>\n<c/>\n</a>", element: "c"},
+
+		{input: "<a><b attr='true'/>\n</a>", element: "a"},
+		{input: "<a><b attr=\"true\"/>\n</a>", element: "a"},
+
+		{input: "<a><b attr='true'/>\n</a>", element: "b"},
+		{input: "<a><b attr=\"true\"/>\n</a>", element: "b"},
+
 		{input: "<a>i<b>cb1</b>j<c>cb2</c>k</a>", element: "a"},
 
 		{input: "<a/>", element: "a"},

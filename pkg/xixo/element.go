@@ -5,9 +5,38 @@ import (
 	"strings"
 )
 
+type Quote string
+
+const (
+	SimpleQuote  = "'"
+	DoubleQuotes = "\""
+)
+
+func ParseQuoteType(car byte) Quote {
+	if car == '\'' {
+		return SimpleQuote
+	}
+
+	return DoubleQuotes
+}
+
+type Attribute struct {
+	Name  string
+	Value string
+	Quote Quote
+}
+
+func (attr Attribute) String() string {
+	if attr.Quote == SimpleQuote {
+		return fmt.Sprintf("%s='%s'", attr.Name, attr.Value)
+	}
+
+	return fmt.Sprintf("%s=\"%s\"", attr.Name, attr.Value)
+}
+
 type XMLElement struct {
 	Name      string
-	Attrs     map[string]string
+	Attrs     map[string]Attribute
 	AttrKeys  []string
 	InnerText string
 	Childs    map[string][]XMLElement
@@ -16,27 +45,11 @@ type XMLElement struct {
 	// filled when xpath enabled
 	childs    []*XMLElement
 	parent    *XMLElement
-	attrs     []*xmlAttr
 	localName string
 	prefix    string
 
 	outerTextBefore string
 	autoClosable    bool
-}
-
-type xmlAttr struct {
-	name  string
-	value string
-}
-
-// SelectElements finds child elements with the specified xpath expression.
-func (n *XMLElement) SelectElements(exp string) ([]*XMLElement, error) {
-	return find(n, exp)
-}
-
-// SelectElement finds child elements with the specified xpath expression.
-func (n *XMLElement) SelectElement(exp string) (*XMLElement, error) {
-	return findOne(n, exp)
 }
 
 func (n *XMLElement) FirstChild() *XMLElement {
@@ -100,7 +113,7 @@ func (n *XMLElement) String() string {
 
 	attributes := n.Name + " "
 	for _, key := range n.AttrKeys {
-		attributes += fmt.Sprintf("%s=\"%s\" ", key, n.Attrs[key])
+		attributes += n.Attrs[key].String() + " "
 	}
 
 	attributes = strings.Trim(attributes, " ")
@@ -119,30 +132,31 @@ func (n *XMLElement) String() string {
 		n.Name)
 }
 
-func (n *XMLElement) AddAttribute(name string, value string) {
+func (n *XMLElement) AddAttribute(attr Attribute) {
 	if n.Attrs == nil {
-		n.Attrs = make(map[string]string)
+		n.Attrs = make(map[string]Attribute)
 	}
 	// if name don't exsite in Attrs yet
-	if _, ok := n.Attrs[name]; !ok {
+	if _, ok := n.Attrs[attr.Name]; !ok {
 		// Add un key in slice to keep the order of attributes
-		n.AttrKeys = append(n.AttrKeys, name)
+		n.AttrKeys = append(n.AttrKeys, attr.Name)
+	} else {
+		attr.Quote = n.Attrs[attr.Name].Quote
 	}
 	// change the value of attribute
-	n.Attrs[name] = value
+	n.Attrs[attr.Name] = attr
 }
 
 func NewXMLElement() *XMLElement {
 	return &XMLElement{
 		Name:      "",
-		Attrs:     map[string]string{},
+		Attrs:     map[string]Attribute{},
 		AttrKeys:  make([]string, 0),
 		InnerText: "",
 		Childs:    map[string][]XMLElement{},
 		Err:       nil,
 		childs:    []*XMLElement{},
 		parent:    nil,
-		attrs:     []*xmlAttr{},
 		localName: "",
 		prefix:    "",
 	}

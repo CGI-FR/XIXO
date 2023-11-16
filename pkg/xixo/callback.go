@@ -11,11 +11,6 @@ type CallbackMap func(map[string]string) (map[string]string, error)
 
 type CallbackJSON func(string) (string, error)
 
-type Attribute struct {
-	Name  string
-	Value string
-}
-
 // XMLElementToMapCallback transforms an XML element into a map, applies a callback function,
 // adds parent attributes, and updates child elements.
 func XMLElementToMapCallback(callback CallbackMap) Callback {
@@ -34,13 +29,11 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 		// Extract parent attributes and add them to the XML element.
 		parentAttributes := extractParentAttributes(dict)
 		for _, attr := range parentAttributes {
-			xmlElement.AddAttribute(attr.Name, attr.Value)
+			xmlElement.AddAttribute(attr)
 		}
 
-		children, err := xmlElement.SelectElements("child::*")
-		if err != nil {
-			return nil, err
-		}
+		children := xmlElement.childs
+
 		// Select child elements and update their text content and attributes.
 		childAttributes := extractChildAttributes(dict)
 
@@ -51,7 +44,7 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 
 			if attributes, ok := childAttributes[child.Name]; ok {
 				for _, attr := range attributes {
-					child.AddAttribute(attr.Name, attr.Value)
+					child.AddAttribute(attr)
 				}
 			}
 		}
@@ -64,13 +57,13 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 
 func extractExistedAttributes(xmlElement *XMLElement, dict map[string]string) {
 	for name, child := range xmlElement.Childs {
-		for attr, value := range child[0].Attrs {
-			dict[name+"@"+attr] = value
+		for attrName, attr := range child[0].Attrs {
+			dict[name+"@"+attrName] = attr.Value
 		}
 	}
 
-	for attr, value := range xmlElement.Attrs {
-		dict["@"+attr] = value
+	for attrName, attr := range xmlElement.Attrs {
+		dict["@"+attrName] = attr.Value
 	}
 }
 

@@ -495,7 +495,8 @@ search_close_tag:
 			if err != nil {
 				return nil, false, x.defaultError()
 			}
-			result.AddAttribute(attr, attrVal)
+
+			result.AddAttribute(Attribute{attr, attrVal, ParseQuoteType(cur)})
 
 			x.scratch.reset()
 

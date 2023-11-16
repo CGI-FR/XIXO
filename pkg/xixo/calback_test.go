@@ -69,11 +69,10 @@ func TestJsonCallback(t *testing.T) {
 	editedRoot, err := xixo.XMLElementToJSONCallback(jsonCallback)(root)
 	assert.Nil(t, err)
 
-	element1, err := editedRoot.SelectElement("element1")
-
-	assert.Nil(t, err)
-
-	assert.Equal(t, "newChildContent", element1.InnerText)
+	assert.Equal(t,
+		"<root>\n\t<element1>newChildContent</element1>\n\t<element2>Contenu2 </element2>\n</root>",
+		editedRoot.String(),
+	)
 }
 
 func badJSONCallback(source string) (string, error) {

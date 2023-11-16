@@ -144,9 +144,11 @@ func TestAddAttributsShouldSaved(t *testing.T) {
 	root = xixo.NewXMLElement()
 	root.Name = name
 
-	root.AddAttribute("foo", "bar")
+	attr := xixo.Attribute{"foo", "bar", xixo.SimpleQuote}
 
-	expected := map[string]string{"foo": "bar"}
+	root.AddAttribute(attr)
+
+	expected := map[string]xixo.Attribute{"foo": attr}
 
 	assert.Equal(t, root.Attrs, expected)
 }
@@ -157,7 +159,7 @@ func TestAddAttributsShouldInOutputWithString(t *testing.T) {
 	root := xixo.NewXMLElement()
 	root.Name = parentTag
 	root.InnerText = "Hello"
-	root.AddAttribute("foo", "bar")
+	root.AddAttribute(xixo.Attribute{"foo", "bar", xixo.DoubleQuotes})
 
 	expected := "<root foo=\"bar\">Hello</root>"
 	assert.Equal(t, expected, root.String())
@@ -169,11 +171,11 @@ func TestEditAttributsShouldInOutputWithString(t *testing.T) {
 	root := xixo.NewXMLElement()
 	root.Name = parentTag
 	root.InnerText = "Hello"
-	root.AddAttribute("foo", "bar")
+	root.AddAttribute(xixo.Attribute{"foo", "bar", xixo.DoubleQuotes})
 
 	expected := "<root foo=\"bar\">Hello</root>"
 	assert.Equal(t, expected, root.String())
-	root.AddAttribute("foo", "bas")
+	root.AddAttribute(xixo.Attribute{"foo", "bas", xixo.DoubleQuotes})
 
 	expected = "<root foo=\"bas\">Hello</root>"
 	assert.Equal(t, expected, root.String())
