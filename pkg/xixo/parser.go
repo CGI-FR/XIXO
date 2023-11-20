@@ -506,6 +506,8 @@ search_close_tag:
 		if cur == '>' { // if tag name not found
 			if prev == '/' { // tag special close
 				result.autoClosable = true
+				result.outerTextBefore = string(x.scratchInnerText.bytes())
+				x.scratchInnerText.reset()
 
 				return result, true, nil
 			}

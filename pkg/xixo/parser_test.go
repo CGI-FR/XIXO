@@ -233,12 +233,24 @@ func TestStreamWithoutModifications(t *testing.T) {
 		// {input: "<a>i<b>cb1</b>j<b>cb2</b>k<b>cb3</b>l</a>", element: "a"},
 		// {input: "<a>i<b>cb1</b>j<b>cb2</b>k</a>", element: "a"},
 
+		{input: "<a>\n<b>\n<d>contenta</d>\n</b>\n   <!-- comment --><c nil='true'/>\n</a>", element: "a"},
+
+		{input: "<a>\n<b>\n<d>content without attrbut</d>\n</b>\n<c/>\n</a>", element: "a"},
+
 		{input: "<a><b/>\n</a>", element: "a"},
 		{input: "<a><b/>\n</a>", element: "b"},
 
 		{input: "<a><b/>\n<c/>\n</a>", element: "a"},
 		{input: "<a><b/>\n<c/>\n</a>", element: "b"},
 		{input: "<a><b/>\n<c/>\n</a>", element: "c"},
+
+		{input: "<a>\n<b>\n<d>contenta</d>\n</b>\n<c xsi:nil=\"true\"/>\n</a>", element: "a"},
+		{input: "<a>\n<b>\n<d>contentb</d>\n</b>\n<c xsi:nil=\"true\" />\n</a>", element: "b"},
+		{input: "<a>\n<b>\n<d>contentc</d>\n</b>\n<c xsi:nil=\"true\" />\n</a>", element: "c"},
+
+		{input: " <a><b><d></d> </b>\n<c/>\n</a>", element: "a"},
+		{input: " <a><b> contenu </b>\n<c/>\n</a>", element: "b"},
+		{input: " <a><b> contenu </b>\n<c xsi:nil=\"true\" />\n</a>", element: "c"},
 
 		{input: "<a><b attr='true'/>\n</a>", element: "a"},
 		{input: "<a><b attr=\"true\"/>\n</a>", element: "a"},
