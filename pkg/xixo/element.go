@@ -124,6 +124,23 @@ func (n *XMLElement) AddAttribute(attr Attribute) {
 	n.Attrs[attr.Name] = attr
 }
 
+func (n *XMLElement) RemoveAttribute(name string) {
+	delete(n.Attrs, name)
+
+	for i, v := range n.AttrKeys {
+		if v == name {
+			n.AttrKeys = append(n.AttrKeys[:i], n.AttrKeys[i+1:]...)
+
+			break
+		}
+	}
+}
+
+func (n *XMLElement) RemoveAllAttribute() {
+	n.Attrs = nil
+	n.AttrKeys = nil
+}
+
 func NewXMLElement() *XMLElement {
 	return &XMLElement{
 		Name:      "",

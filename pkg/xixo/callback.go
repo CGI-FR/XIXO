@@ -30,6 +30,14 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 		parentAttributes := extractParentAttributes(dict)
 		for _, attr := range parentAttributes {
 			xmlElement.AddAttribute(attr)
+
+			for _, existAttribute := range xmlElement.AttrKeys {
+				println(existAttribute)
+			}
+		}
+		// If all attributes of parent sont removed
+		if len(parentAttributes) == 0 && len(xmlElement.Attrs) > 0 {
+			xmlElement.RemoveAllAttribute()
 		}
 
 		children := xmlElement.childs
@@ -42,10 +50,28 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 				child.InnerText = value
 			}
 
-			if attributes, ok := childAttributes[child.Name]; ok {
+			attributes, ok := childAttributes[child.Name]
+			if ok {
+				// Add new attributes
 				for _, attr := range attributes {
 					child.AddAttribute(attr)
 				}
+
+				// Check if attributes are available for the current child
+				existingAttributes := make(map[string]bool)
+				for _, existAttribute := range attributes {
+					existingAttributes[existAttribute.Name] = true
+				}
+
+				// Check if the attribute is already present
+				for _, xmlAttributeName := range child.AttrKeys {
+					if !existingAttributes[xmlAttributeName] {
+						child.RemoveAttribute(xmlAttributeName)
+					}
+				}
+			} else if !ok && len(child.Attrs) > 0 {
+				// If there is no childAttribute but child has attrs, it means all the attributes got removed
+				child.RemoveAllAttribute()
 			}
 		}
 

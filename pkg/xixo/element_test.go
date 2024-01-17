@@ -184,7 +184,7 @@ func TestEditAttributsShouldInOutputWithString(t *testing.T) {
 func TestElementStringShouldRemoveTargetAttribute(t *testing.T) {
 	t.Parallel()
 
-	rootXML := `<root>
+	rootXML := `<root location="Nantes">
   <element1 name="joe" age="5">Hello world !</element1>
   <element2 name="doe">Contenu2 </element2>
 </root>`
@@ -193,16 +193,20 @@ func TestElementStringShouldRemoveTargetAttribute(t *testing.T) {
 	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), &resultXMLBuffer).EnableXpath()
 	parser.RegisterMapCallback(parentTag, func(x map[string]string) (map[string]string, error) {
 		delete(x, "element1@name")
+		delete(x, "@location")
+		delete(x, "element2@name")
+
 		return x, nil
 	})
 
 	expect := `<root>
   <element1 age="5">Hello world !</element1>
-  <element2 name="doe">Contenu2 </element2>
+  <element2>Contenu2 </element2>
 </root>`
 
 	err := parser.Stream()
 	assert.Nil(t, err)
+
 	resultXML := resultXMLBuffer.String()
 	assert.Equal(t, expect, resultXML)
 }
