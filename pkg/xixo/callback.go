@@ -26,6 +26,20 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 		if err != nil {
 			return nil, err
 		}
+
+		if len(xmlElement.Childs) > 0 {
+			existingChilds := make(map[string]bool)
+			for key := range dict {
+				existingChilds[key] = true
+			}
+			// Check if the attribute is already present
+			for name := range xmlElement.Childs {
+				if !existingChilds[name] {
+					xmlElement.RemoveChild(name)
+				}
+			}
+		}
+
 		// Extract parent attributes and add them to the XML element.
 		parentAttributes := extractParentAttributes(dict)
 		for _, attr := range parentAttributes {

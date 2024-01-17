@@ -136,6 +136,10 @@ func (n *XMLElement) RemoveAttribute(name string) {
 	}
 }
 
+func (n *XMLElement) RemoveChild(name string) {
+	delete(n.Childs, name)
+}
+
 func NewXMLElement() *XMLElement {
 	return &XMLElement{
 		Name:      "",

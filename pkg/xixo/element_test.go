@@ -216,7 +216,7 @@ func TestElementStringShouldRemoveTargetTag(t *testing.T) {
 
 	rootXML := `<root location="Nantes" name="Agency">
   <element1 name="joe" age="5">Hello world !</element1>
-<element2 name="doe">Contenu2 </element2>
+  <element2 name="doe">Contenu2 </element2>
 </root>`
 
 	var resultXMLBuffer bytes.Buffer
@@ -229,7 +229,7 @@ func TestElementStringShouldRemoveTargetTag(t *testing.T) {
 	})
 
 	expect := `<root name="Agency">
-<element2 name="doe">Contenu2 </element2>
+  <element2 name="doe">Contenu2 </element2>
 </root>`
 
 	err := parser.Stream()
