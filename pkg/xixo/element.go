@@ -90,9 +90,7 @@ func (n *XMLElement) String() string {
 	attributes := n.Name + " "
 
 	for _, key := range n.AttrKeys {
-		if n.Attrs[key].Value != "*remove" {
-			attributes += n.Attrs[key].String() + " "
-		}
+		attributes += n.Attrs[key].String() + " "
 	}
 
 	attributes = strings.Trim(attributes, " ")

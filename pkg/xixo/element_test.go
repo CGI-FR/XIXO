@@ -185,20 +185,19 @@ func TestElementStringShouldRemoveTargetAttribute(t *testing.T) {
 	t.Parallel()
 
 	rootXML := `<root>
-  <element1 name="joe">Hello world !</element1>
+  <element1 name="joe" age="5">Hello world !</element1>
   <element2 name="doe">Contenu2 </element2>
 </root>`
 
 	var resultXMLBuffer bytes.Buffer
 	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), &resultXMLBuffer).EnableXpath()
 	parser.RegisterMapCallback(parentTag, func(x map[string]string) (map[string]string, error) {
-		x["element1@name"] = "*remove"
-
+		delete(x, "element1@name")
 		return x, nil
 	})
 
 	expect := `<root>
-  <element1>Hello world !</element1>
+  <element1 age="5">Hello world !</element1>
   <element2 name="doe">Contenu2 </element2>
 </root>`
 
