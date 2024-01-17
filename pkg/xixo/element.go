@@ -136,11 +136,6 @@ func (n *XMLElement) RemoveAttribute(name string) {
 	}
 }
 
-func (n *XMLElement) RemoveAllAttribute() {
-	n.Attrs = nil
-	n.AttrKeys = nil
-}
-
 func NewXMLElement() *XMLElement {
 	return &XMLElement{
 		Name:      "",

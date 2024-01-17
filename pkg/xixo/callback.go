@@ -30,16 +30,9 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 		parentAttributes := extractParentAttributes(dict)
 		for _, attr := range parentAttributes {
 			xmlElement.AddAttribute(attr)
-
-			for _, existAttribute := range xmlElement.AttrKeys {
-				println(existAttribute)
-			}
 		}
-		// If all attributes of parent sont removed
-		if len(parentAttributes) == 0 && len(xmlElement.Attrs) > 0 {
-			xmlElement.RemoveAllAttribute()
-		}
-
+		// Apply remove on parentAttributes
+		removeAttributes(parentAttributes, xmlElement)
 		children := xmlElement.childs
 
 		// Select child elements and update their text content and attributes.
@@ -56,29 +49,30 @@ func XMLElementToMapCallback(callback CallbackMap) Callback {
 				for _, attr := range attributes {
 					child.AddAttribute(attr)
 				}
-
-				// Check if attributes are available for the current child
-				existingAttributes := make(map[string]bool)
-				for _, existAttribute := range attributes {
-					existingAttributes[existAttribute.Name] = true
-				}
-
-				// Check if the attribute is already present
-				for _, xmlAttributeName := range child.AttrKeys {
-					if !existingAttributes[xmlAttributeName] {
-						child.RemoveAttribute(xmlAttributeName)
-					}
-				}
-			} else if !ok && len(child.Attrs) > 0 {
-				// If there is no childAttribute but child has attrs, it means all the attributes got removed
-				child.RemoveAllAttribute()
 			}
+
+			// Apply remove on child attributes
+			removeAttributes(attributes, child)
 		}
 
 		return xmlElement, nil
 	}
 
 	return result
+}
+
+func removeAttributes(attributes []Attribute, element *XMLElement) {
+	// Check if attributes are available for the current child
+	existingAttributes := make(map[string]bool)
+	for _, existAttribute := range attributes {
+		existingAttributes[existAttribute.Name] = true
+	}
+	// Check if the attribute is already present
+	for _, xmlAttributeName := range element.AttrKeys {
+		if !existingAttributes[xmlAttributeName] {
+			element.RemoveAttribute(xmlAttributeName)
+		}
+	}
 }
 
 func extractExistedAttributes(xmlElement *XMLElement, dict map[string]string) {
