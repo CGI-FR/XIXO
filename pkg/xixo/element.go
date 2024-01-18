@@ -138,6 +138,16 @@ func (n *XMLElement) RemoveAttribute(name string) {
 
 func (n *XMLElement) RemoveChild(name string) {
 	delete(n.Childs, name)
+	// If xPath is enabled and element have childs
+	if len(n.childs) > 0 {
+		for i, child := range n.childs {
+			if child.Name == name {
+				n.childs = append(n.childs[:i], n.childs[i+1:]...)
+
+				break
+			}
+		}
+	}
 }
 
 func NewXMLElement() *XMLElement {
