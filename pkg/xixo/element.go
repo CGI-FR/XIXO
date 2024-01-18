@@ -143,8 +143,6 @@ func (n *XMLElement) RemoveChild(name string) {
 		for i, child := range n.childs {
 			if child.Name == name {
 				n.childs = append(n.childs[:i], n.childs[i+1:]...)
-
-				break
 			}
 		}
 	}
