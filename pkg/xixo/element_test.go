@@ -181,7 +181,7 @@ func TestEditAttributsShouldInOutputWithString(t *testing.T) {
 	assert.Equal(t, expected, root.String())
 }
 
-func TestElementStringShouldRemoveTargetAttribute(t *testing.T) {
+func TestCallbackShouldRemoveTargetAttribute(t *testing.T) {
 	t.Parallel()
 
 	rootXML := `<root location="Nantes">
@@ -211,7 +211,7 @@ func TestElementStringShouldRemoveTargetAttribute(t *testing.T) {
 	assert.Equal(t, expect, resultXML)
 }
 
-func TestElementStringShouldRemoveTargetTag(t *testing.T) {
+func TestCallbackShouldRemoveTargetTag(t *testing.T) {
 	t.Parallel()
 
 	rootXML := `<root location="Nantes" name="Agency">
