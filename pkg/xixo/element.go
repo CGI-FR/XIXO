@@ -88,6 +88,7 @@ func (n *XMLElement) String() string {
 	}
 
 	attributes := n.Name + " "
+
 	for _, key := range n.AttrKeys {
 		attributes += n.Attrs[key].String() + " "
 	}
@@ -121,6 +122,30 @@ func (n *XMLElement) AddAttribute(attr Attribute) {
 	}
 	// change the value of attribute
 	n.Attrs[attr.Name] = attr
+}
+
+func (n *XMLElement) RemoveAttribute(name string) {
+	delete(n.Attrs, name)
+
+	for i, v := range n.AttrKeys {
+		if v == name {
+			n.AttrKeys = append(n.AttrKeys[:i], n.AttrKeys[i+1:]...)
+
+			break
+		}
+	}
+}
+
+func (n *XMLElement) RemoveChild(name string) {
+	delete(n.Childs, name)
+	// If xPath is enabled and element have childs
+	if len(n.childs) > 0 {
+		for i, child := range n.childs {
+			if child.Name == name {
+				n.childs = append(n.childs[:i], n.childs[i+1:]...)
+			}
+		}
+	}
 }
 
 func NewXMLElement() *XMLElement {

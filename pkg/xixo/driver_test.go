@@ -47,7 +47,7 @@ func TestFuncDriverEditEmptyElement(t *testing.T) {
 	callback := func(input map[string]string) (map[string]string, error) {
 		called = true
 
-		return map[string]string{}, nil
+		return input, nil
 	}
 
 	subscribers := map[string]xixo.CallbackMap{"root": callback}
