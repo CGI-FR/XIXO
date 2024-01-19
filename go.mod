@@ -1,4 +1,4 @@
-module github.com/CGI-FR/xixo
+module github.com/Chao-Ma5566/xixoAttribut
 
 go 1.21
 
