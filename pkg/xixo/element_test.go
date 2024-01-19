@@ -180,3 +180,92 @@ func TestEditAttributsShouldInOutputWithString(t *testing.T) {
 	expected = "<root foo=\"bas\">Hello</root>"
 	assert.Equal(t, expected, root.String())
 }
+
+func TestCallbackShouldRemoveTargetAttribute(t *testing.T) {
+	t.Parallel()
+
+	rootXML := `<root location="Nantes">
+  <element1 name="joe" age="5">Hello world !</element1>
+  <element2 name="doe">Contenu2 </element2>
+</root>`
+
+	var resultXMLBuffer bytes.Buffer
+	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), &resultXMLBuffer).EnableXpath()
+	parser.RegisterMapCallback(parentTag, func(x map[string]string) (map[string]string, error) {
+		delete(x, "element1@name")
+		delete(x, "@location")
+		delete(x, "element2@name")
+
+		return x, nil
+	})
+
+	expect := `<root>
+  <element1 age="5">Hello world !</element1>
+  <element2>Contenu2 </element2>
+</root>`
+
+	err := parser.Stream()
+	assert.Nil(t, err)
+
+	resultXML := resultXMLBuffer.String()
+	assert.Equal(t, expect, resultXML)
+}
+
+func TestCallbackShouldRemoveTargetTag(t *testing.T) {
+	t.Parallel()
+
+	rootXML := `<root location="Nantes" name="Agency">
+  <element1 name="joe" age="5">Hello world !</element1>
+  <element2 name="doe">Contenu2 </element2>
+</root>`
+
+	var resultXMLBuffer bytes.Buffer
+	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), &resultXMLBuffer).EnableXpath()
+	parser.RegisterMapCallback(parentTag, func(x map[string]string) (map[string]string, error) {
+		delete(x, "element1")
+		delete(x, "@location")
+
+		return x, nil
+	})
+
+	expect := `<root name="Agency">
+  <element2 name="doe">Contenu2 </element2>
+</root>`
+
+	err := parser.Stream()
+	assert.Nil(t, err)
+
+	resultXML := resultXMLBuffer.String()
+	assert.Equal(t, expect, resultXML)
+}
+
+func TestCallbackShouldRemoveTargetTagsAndTargetAttrsWithSameName(t *testing.T) {
+	t.Parallel()
+
+	rootXML := `<root location="Nantes" name="Agency">
+  <element1 name="joe" age="5">Hello world !</element1>
+  <element2 name="doe">Contenu2 </element2>
+  <element1 name="joe" age="5">Hello world !</element1>
+  <element2 name="doe">Contenu2 </element2>
+</root>`
+
+	var resultXMLBuffer bytes.Buffer
+	parser := xixo.NewXMLParser(bytes.NewBufferString(rootXML), &resultXMLBuffer).EnableXpath()
+	parser.RegisterMapCallback(parentTag, func(x map[string]string) (map[string]string, error) {
+		delete(x, "element1")
+		delete(x, "element2@name")
+
+		return x, nil
+	})
+
+	expect := `<root location="Nantes" name="Agency">
+  <element2>Contenu2 </element2>
+  <element2>Contenu2 </element2>
+</root>`
+
+	err := parser.Stream()
+	assert.Nil(t, err)
+
+	resultXML := resultXMLBuffer.String()
+	assert.Equal(t, expect, resultXML)
+}
