@@ -14,6 +14,10 @@ Types of changes
 - `Fixed` for any bug fixes.
 - `Security` in case of vulnerabilities.
 
+## [0.1.8]
+
+- `Added` capacity to apply remove mask in XML file.
+
 ## [0.1.0]
 
 - `Added` First official version of xixo.
