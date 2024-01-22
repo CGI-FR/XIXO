@@ -16,7 +16,7 @@ Types of changes
 
 ## [0.1.8]
 
-- `Added` capacity to apply remove mask in XML file.
+- `Added` capacity to delete a target attribute or entier tag in XML file.
 
 ## [0.1.0]
 
